@@ -18,7 +18,7 @@ services:
       - mysql
     build: ./web
     ports:
-      - 8080:80
+      - 5000:5000
     expose:
       - "5000"
     volumes:
