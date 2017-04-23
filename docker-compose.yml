@@ -1,25 +1,37 @@
 version: "2"
 
 services:
-  data:
-    image: postgres:9.6
+  mysql:
+    image: mysql
+    build: ./mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "morgan"
+      MYSQL_DATABASE: "ds-recruit"
     volumes:
-      - /var/lib/postgresql
-    command: "true"
-  postgres:
+      - mysql_data:/var/lib/mysql
     restart: always
-    build: ./postgresql
-    volumes_from:
-      - data
-    ports:
-      - "5432:5432"
+    networks:
+      - ds-recruit_mysql_net
+
   web:
     depends_on:
-      - postgres
+      - mysql
     build: ./web
     ports:
-      - "5000:5000"
-    links:
-      - postgres:postgres
+      - 8080:80
+    expose:
+      - "5000"
     volumes:
       - .:/code
+    links:
+      - mysql:mysql
+    restart: always
+    networks:
+      - ds-recruit_mysql_net
+
+volumes:
+  mysql_data:
+
+networks:
+  ds-recruit_mysql_net:
+    driver: bridge
