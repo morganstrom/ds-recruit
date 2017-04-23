@@ -1,1 +1,5 @@
+# Mac index files
 *.DS_Store
+
+# Data folder
+mysql-data/*
