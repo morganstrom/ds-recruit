@@ -3,6 +3,15 @@ from flask.ext.mysql import MySQL
 
 app = Flask(__name__)
 
+mysql = MySQL()
+
+# MySQL configurations
+app.config['MYSQL_DATABASE_USER'] = 'morgan'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'morgan'
+app.config['MYSQL_DATABASE_DB'] = 'BucketList'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
+
 @app.route('/')
 def main():
     return render_template('index.html')

@@ -2,7 +2,6 @@ version: "2"
 
 services:
   mysql:
-    image: mysql
     build: ./mysql
     environment:
       MYSQL_ROOT_PASSWORD: "morgan"
