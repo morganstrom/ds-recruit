@@ -6,3 +6,6 @@ mysql-data/*
 
 # IntelliJ data
 *.idea
+
+# Python executable
+*.pyc
