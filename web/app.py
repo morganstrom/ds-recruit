@@ -1,4 +1,5 @@
 from flask import Flask, render_template, json, request
+from flask.ext.mysql import MySQL
 
 app = Flask(__name__)
 
@@ -24,6 +25,7 @@ def signUp():
 		return json.dumps({'html':'<span>All fields good</span>'})
 	else:
 		return json.dumps({'html':'<span>Enter the required fields</span>'})
+
 
 
 if __name__ == '__main__':
