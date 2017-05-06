@@ -3,3 +3,6 @@
 
 # Data folder
 mysql-data/*
+
+# IntelliJ data
+*.idea
