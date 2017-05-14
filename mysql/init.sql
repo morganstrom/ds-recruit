@@ -1,4 +1,4 @@
--- Set up database and procedure for bucket list app
+-- Set up database and procedures for bucket list app
 
 CREATE DATABASE BucketList;
 
@@ -9,6 +9,8 @@ CREATE TABLE BucketList.tbl_user (
   user_password VARCHAR(256) NULL,
   PRIMARY KEY (user_id));
 
+
+-- Procedure for creating user
 DELIMITER $$
 CREATE DEFINER=root@localhost PROCEDURE BucketList.sp_createUser(
     IN p_name VARCHAR(256),
@@ -39,4 +41,15 @@ BEGIN
 END$$
 DELIMITER ;
 
+-- Procedure for validating login
+DELIMITER $$
+CREATE DEFINER=root@localhost PROCEDURE BucketList.sp_validateLogin(
+IN p_username VARCHAR(255)
+)
+BEGIN
+    select * from tbl_user where user_username = p_username;
+END$$
+DELIMITER ;
+
+-- Global settings
 SET @@global.sql_mode= 'NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
