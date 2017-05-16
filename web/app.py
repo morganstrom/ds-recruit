@@ -10,7 +10,7 @@ mysql = MySQL()
 # MySQL configurations
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'morgan'
-app.config['MYSQL_DATABASE_DB'] = 'BucketList'
+app.config['MYSQL_DATABASE_DB'] = 'ds_recruit'
 app.config['MYSQL_DATABASE_HOST'] = 'mysql_1'
 mysql.init_app(app)
 

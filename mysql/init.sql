@@ -1,8 +1,7 @@
--- Set up database and procedures for bucket list app
+-- Set up table and procedures for user authentication
 
-CREATE DATABASE BucketList;
-
-CREATE TABLE BucketList.tbl_user (
+-- Table for users
+CREATE TABLE ds_recruit.tbl_user (
   user_id BIGINT NOT NULL AUTO_INCREMENT,
   user_name VARCHAR(256) NULL,
   user_username VARCHAR(256) NULL,
@@ -10,9 +9,9 @@ CREATE TABLE BucketList.tbl_user (
   PRIMARY KEY (user_id));
 
 
--- Procedure for creating user
+-- Procedure for creating users
 DELIMITER $$
-CREATE DEFINER=root@localhost PROCEDURE BucketList.sp_createUser(
+CREATE DEFINER=root@localhost PROCEDURE ds_recruit.sp_createUser(
     IN p_name VARCHAR(256),
     IN p_username VARCHAR(256),
     IN p_password VARCHAR(256)
@@ -43,7 +42,7 @@ DELIMITER ;
 
 -- Procedure for validating login
 DELIMITER $$
-CREATE DEFINER=root@localhost PROCEDURE BucketList.sp_validateLogin(
+CREATE DEFINER=root@localhost PROCEDURE ds_recruit.sp_validateLogin(
 IN p_username VARCHAR(255)
 )
 BEGIN

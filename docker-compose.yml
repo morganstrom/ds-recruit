@@ -5,7 +5,7 @@ services:
     build: ./mysql
     environment:
       MYSQL_ROOT_PASSWORD: "morgan"
-      MYSQL_DATABASE: "ds-recruit"
+      MYSQL_DATABASE: "ds_recruit"
       MYSQL_USER: "morgan"
       MYSQL_PASSWORD: "morgan"
     volumes:
@@ -23,7 +23,7 @@ services:
     expose:
       - "5000"
     volumes:
-      - .:/code
+      - ./web:/code
     links:
       - mysql:mysql
     restart: always
