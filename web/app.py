@@ -83,12 +83,12 @@ def validateLogin():
                     session['user'] = data[0][0]
                     return redirect('/userHome')
                 else:
-                    return render_template('error.html', error = 'Wrong Email address or Password.')
+                    return render_template('error.html', error='Wrong Email address or Password.')
             else:
-                return render_template('error.html', error = 'Wrong Email address or Password.')
+                return render_template('error.html', error='Wrong Email address or Password.')
 
     except Exception as e:
-        return render_template('error.html',error = str(e))
+        return render_template('error.html', error=str(e))
     finally:
         cursor.close()
         conn.close()
@@ -98,12 +98,12 @@ def userHome():
     if session.get('user'):
         return render_template('userhome.html')
     else:
-        return render_template('error.html',error = 'Unauthorized Access')
+        return render_template('error.html', error='Unauthorized Access')
 
 @app.route('/logout')
 def logout():
-    session.pop('user',None)
+    session.pop('user', None)
     return redirect('/')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')  # Which host?
+    app.run(debug=True, host='0.0.0.0')
