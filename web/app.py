@@ -105,5 +105,19 @@ def logout():
     session.pop('user', None)
     return redirect('/')
 
+
+@app.route('/item_mc')
+def showItem():
+    item_data = {
+        'question': 'Which web framework do you use?',
+        'fields': ['Flask', 'Django', 'TurboGears', 'web2py', 'pylonsproject']
+    }
+    return render_template('item_mc.html', data=item_data)
+
+@app.route('/response')
+def showResponse():
+    vote = request.args.get('field')
+    return vote
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
