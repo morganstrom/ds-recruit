@@ -1,19 +1,7 @@
-from flask import Flask, render_template, json, request, redirect, session
-from flask.ext.mysql import MySQL
+from ds_recruit import app, mysql
+
 from werkzeug import generate_password_hash, check_password_hash
-
-app = Flask(__name__)
-app.secret_key = 'why would I tell you my secret key?'
-
-mysql = MySQL()
-
-# MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'morgan'
-app.config['MYSQL_DATABASE_DB'] = 'ds_recruit'
-app.config['MYSQL_DATABASE_HOST'] = 'mysql_1'
-mysql.init_app(app)
-
+from flask import render_template, json, request, redirect, session
 
 @app.route('/')
 def main():
