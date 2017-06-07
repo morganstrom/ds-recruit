@@ -27,6 +27,7 @@ services:
     links:
       - mysql:mysql
     restart: always
+    env_file: .env
     networks:
       - ds-recruit_mysql_net
 
