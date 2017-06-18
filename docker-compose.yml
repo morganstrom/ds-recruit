@@ -13,14 +13,10 @@ services:
 
   mysql:
     build: ./mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: "morgan"
-      MYSQL_DATABASE: "ds_recruit"
-      MYSQL_USER: "morgan"
-      MYSQL_PASSWORD: "morgan"
     volumes:
       - mysql_data:/var/lib/mysql
     restart: always
+    env_file: .env
     networks:
       - ds_net
 
