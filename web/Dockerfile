@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM hypriot/rpi-python
 MAINTAINER Morgan Strom "morgan.e.strom@gmail.com"
 COPY requirements.txt /code/requirements.txt
 WORKDIR /code

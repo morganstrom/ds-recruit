@@ -1,2 +1,2 @@
-FROM mysql:5.7
+FROM hypriot/rpi-mysql
 ADD init.sql /docker-entrypoint-initdb.d/init.sql
