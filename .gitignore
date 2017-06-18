@@ -9,3 +9,6 @@ mysql-data/*
 
 # Python executable
 *.pyc
+
+# Environment variables
+*.env
