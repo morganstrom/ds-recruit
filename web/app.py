@@ -95,7 +95,7 @@ def userHome():
     if session.get('user'):
         return render_template('userhome.html')
     else:
-        return render_template('error.html', error='Unauthorized Access')
+        return render_template('signin.html')
 
 @app.route('/logout')
 def logout():

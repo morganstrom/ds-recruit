@@ -1,6 +1,16 @@
 version: "2"
 
 services:
+  nginx:
+    restart: always
+    build: ./nginx
+    ports:
+      - "80:80"
+    links:
+      - web:web
+    networks:
+      - ds_net
+
   mysql:
     build: ./mysql
     environment:
@@ -12,16 +22,14 @@ services:
       - mysql_data:/var/lib/mysql
     restart: always
     networks:
-      - ds-recruit_mysql_net
+      - ds_net
 
   web:
     depends_on:
       - mysql
     build: ./web
     ports:
-      - 5000:5000
-    expose:
-      - "5000"
+      - "5000:5000"
     volumes:
       - ./web:/code
     links:
@@ -29,11 +37,11 @@ services:
     restart: always
     env_file: .env
     networks:
-      - ds-recruit_mysql_net
+      - ds_net
 
 volumes:
   mysql_data:
 
 networks:
-  ds-recruit_mysql_net:
+  ds_net:
     driver: bridge
