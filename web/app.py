@@ -48,14 +48,14 @@ def signUp():
             else:
                 return json.dumps({'error': str(data[0])})
 
+            cursor.close()
+            conn.close()
+
         else:
             return json.dumps({'html': '<span>Enter the required fields</span>'})
     except Exception as e:
         return json.dumps({'error': str(e)})
 
-    finally:
-        cursor.close()
-        conn.close()
 
 @app.route('/showSignIn')
 def showSignIn():
@@ -84,11 +84,11 @@ def validateLogin():
             else:
                 return render_template('error.html', error='Wrong Email address or Password.')
 
+            cursor.close()
+            conn.close()
+
     except Exception as e:
         return render_template('error.html', error=str(e))
-    finally:
-        cursor.close()
-        conn.close()
 
 @app.route('/userHome')
 def userHome():
