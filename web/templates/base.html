@@ -7,9 +7,10 @@
     <title>{% block title %}{% endblock %}</title>
 
     <!-- Bootstrap -->
-    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/bootstrap-4.0.0-alpha.6-dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
     <link href="../static/css/navbar.css" rel="stylesheet">
+    <link href="../static/css/footer.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -21,30 +22,35 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="../static/js/jquery-3.2.1.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="../static/js/bootstrap.min.js"></script>
+    <script src="../static/bootstrap-4.0.0-alpha.6-dist/js/bootstrap.min.js"></script>
 
     {% block head %}{% endblock %}
 </head>
 <body>
 
-    <nav class="navbar navbar-light">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">
-                    <img src="../static/arrow-logo-black.png" height="100" width="81" class="d-inline-block align-top"/>
-                </a>
+    <nav class="navbar navbar-toggleable-sm navbar-light">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggler navbar-toggler-right" data-toggle="collapse" data-target="#navbar1">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">
+                <img src="../static/arrow-logo-black.png" height="100" width="81"/>
+            </a>
 
-            </div>
-            <ul class="nav navbar-nav pull-right">
-                <li role="presentation" class="active"><a href="/userHome">Home</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar1">
+            <ul class="nav navbar-nav ml-auto">
+                <li role="presentation" class="nav-item">
+                    <a class="nav-link" href="/userHome">Home</a>
                 </li>
-                <li role="presentation"><a href="/showSignIn">Sign In</a>
+                <li role="presentation" class="nav-item">
+                    <a class="nav-link" href="/showSignIn">Sign in</a>
                 </li>
-                <li role="presentation"><a href="/showSignUp">Sign Up</a>
+                <li role="presentation" class="nav-item">
+                    <a class="nav-link" href="/showSignUp">Sign up</a>
                 </li>
             </ul>
         </div>
-
     </nav>
 
     <div class="container">
@@ -58,7 +64,10 @@
         </div>
 
         <footer class="footer">
-            <p>&copy; Clik Recruitment 2017</p>
+            <div class="center">
+                <p>FIND TOP TALENT:</p>
+                <p><a href="http://www.clikrecruit.se" target="_blank"><kbd>Ctrl</kbd></a>+<a href="http://www.clikrecruit.se" target="_blank"><kbd>Clik</kbd></a>+<a href="http://www.clikrecruit.se" target="_blank"><kbd>Recruit</kbd></a></p>
+            </div>
         </footer>
 
     </div>

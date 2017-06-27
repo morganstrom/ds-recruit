@@ -1,0 +1,30 @@
+.center {
+  margin: auto;
+  width: 100%;
+  text-align:center;
+  padding:5px;
+}
+kbd {
+    -moz-border-radius:3px;
+    -moz-box-shadow:0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+    -webkit-border-radius:3px;
+    -webkit-box-shadow:0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+    background-color:#f7f7f7;
+    border:2px solid #ddd;
+    border-radius:4px;
+    box-shadow:0 2px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset;
+    color:#666;
+    display:inline-block;
+    font-family: Consolas, "Lucida Console", monospace;
+    font-size:16px;
+    line-height:1.4;
+    margin:0 .1em;
+    padding:.1em .6em;
+    text-shadow:0 1px 0 #fff;
+}
+kbd:hover {
+  background-color:#eee !important;
+  color:#222 !important;
+  border:2px solid #ccc;
+  box-shadow:0 2px 0 rgba(0,0,0,0.2),0 0 0 2px #eee inset;
+}
