@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Item{% endblock %}
+{% block head %}
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+{% endblock %}
+{% block content %}
+    <div class="col">
+        <h3>Question</h3>
+        <div class="row">
+            <div class="col-md">
+                <p>{{ data.question }}</p>
+            </div>
+        </div>
+        <form action="/prob/{{ item_nr }}" method="POST">
+            {% for e in data.options %}
+            <div class="radio">
+                <label>
+                    <input name="option" type="radio" value="{{ e }}"/>
+                    {{ e }}
+                </label>
+            </div>
+            {% endfor %}
+            <div class="d-flex justify-content-center">
+                <div class="btn-group" role="group">
+                    <input name="previous" type="submit" id="button" value="Previous" class="btn btn-secondary" />
+                    <input name="next" type="submit" id="button" value="Next" class="btn btn-primary" />​
+                </div>
+            </div>
+        </form>
+        <br/>
+    </div>
+{% endblock %}

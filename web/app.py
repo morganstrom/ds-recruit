@@ -1,6 +1,6 @@
 # app.py
 
-from flask import Flask, render_template, json, request, redirect, session
+from flask import Flask, render_template, json, request, redirect, url_for, session
 from flask.ext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
 
@@ -78,7 +78,7 @@ def validateLogin():
             if len(data) > 0:
                 if check_password_hash(str(data[0][3]), _password):
                     session['user'] = data[0][0]
-                    return redirect('/userHome')
+                    return redirect(url_for('userHome'))
                 else:
                     return render_template('error.html', error='Wrong Email address or Password.')
             else:
@@ -100,21 +100,35 @@ def userHome():
 @app.route('/logout')
 def logout():
     session.pop('user', None)
-    return redirect('/')
+    return redirect(url_for('main'))
 
+@app.route('/prob/<int:item_nr>', methods=["GET"])
+def showItem(item_nr):
+    # Load items
+    with open("items/probability.json") as data_file:
+        item_set = json.load(data_file)
+    # Check for end of test
+    if item_nr >= len(item_set):
+        return "test over!"
+    else:
+        # Show current item
+        item = item_set[item_nr]
+        return render_template('prob.html', data=item, item_nr=item_nr)
 
-@app.route('/item_mc')
-def showItem():
-    item_data = {
-        'question': 'Which web framework do you use?',
-        'fields': ['Flask', 'Django', 'TurboGears', 'web2py', 'pylonsproject']
-    }
-    return render_template('item_mc.html', data=item_data)
+@app.route('/prob/<int:item_nr>', methods=["POST"])
+def scoreItem(item_nr):
+    # Score item - TBD
 
-@app.route('/response')
-def showResponse():
-    vote = request.args.get('field')
-    return vote
+    # Decide what is the next item based on which button was pressed
+    if "next" in request.form.to_dict():
+        next_item = item_nr + 1
+    else:
+        if item_nr - 1 < 0:
+            next_item = item_nr
+        else:
+            next_item = item_nr - 1
+
+    return redirect(url_for("showItem", item_nr=next_item, _method="GET"))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
