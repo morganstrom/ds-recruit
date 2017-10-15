@@ -1,96 +1,63 @@
 # app.py
 
 from flask import Flask, render_template, json, request, redirect, url_for, session
-from flask.ext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
+from model import db, User
 
-from config import BaseConfig
-
+# initialize app
 app = Flask(__name__)
-app.config.from_object(BaseConfig)
-mysql = MySQL()
-mysql.init_app(app)
 
+# Try to create tables
+db.create_all()
+# admin = User(username='admin', email='morgan@clikrecruit.se')
+# db.session.add(admin)
+# db.session.commit()
 
 @app.route('/')
 def main():
     return render_template('index.html')
 
 
-@app.route('/showSignUp')
+@app.route('/signup', methods=['GET'])
 def showSignUp():
     return render_template('signup.html')
 
 
-@app.route('/signUp', methods=['POST'])
+@app.route('/signup', methods=['POST'])
 def signUp():
     """Code for creating a user"""
-
     try:
         # Read the posted values from the UI
         _name = request.form['inputName']
         _email = request.form['inputEmail']
         _password = request.form['inputPassword']
 
-        # Validate the received values
         if _name and _email and _password:
-            # All Good, let's call MySQL
+            password_hash = generate_password_hash(_password)
 
-            conn = mysql.connect()
-            cursor = conn.cursor()
-            _hashed_password = generate_password_hash(_password)
-            cursor.callproc('sp_createUser', (_name, _email, _hashed_password))
-            data = cursor.fetchall()
-
-            if len(data) is 0:
-                conn.commit()
-                return json.dumps({'message': 'User created successfully !'})
-            else:
-                return json.dumps({'error': str(data[0])})
-
-            cursor.close()
-            conn.close()
-
+            newuser = User(name=_name,
+                           email=_email,
+                           password=password_hash)
+            db.session.add(newuser)
+            db.session.commit()
+            return redirect(url_for('userHome'))
         else:
             return json.dumps({'html': '<span>Enter the required fields</span>'})
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 
 
-@app.route('/showSignIn')
+@app.route('/signin', methods=['GET'])
 def showSignIn():
     return render_template('signin.html')
 
-@app.route('/validateLogin', methods=['POST'])
+@app.route('/signin', methods=['POST'])
 def validateLogin():
-    try:
-        _username = request.form['inputEmail']
-        _password = request.form['inputPassword']
+    """Code for validating user login"""
+    pass
 
-        if _username and _password:
-
-            conn = mysql.connect()
-            cursor = conn.cursor()
-            cursor.callproc('sp_validateLogin', (_username,))
-            data = cursor.fetchall()
-
-            # If the username exists, match with stored password
-            if len(data) > 0:
-                if check_password_hash(str(data[0][3]), _password):
-                    session['user'] = data[0][0]
-                    return redirect(url_for('userHome'))
-                else:
-                    return render_template('error.html', error='Wrong Email address or Password.')
-            else:
-                return render_template('error.html', error='Wrong Email address or Password.')
-
-            cursor.close()
-            conn.close()
-
-    except Exception as e:
-        return render_template('error.html', error=str(e))
-
-@app.route('/userHome')
+@app.route('/home')
 def userHome():
     if session.get('user'):
         return render_template('userhome.html')
@@ -131,4 +98,4 @@ def scoreItem(item_nr):
     return redirect(url_for("showItem", item_nr=next_item, _method="GET"))
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=5000)

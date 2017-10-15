@@ -11,4 +11,3 @@ mysql-data/*
 *.pyc
 
 # Environment variables
-*.env
