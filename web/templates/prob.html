@@ -8,11 +8,11 @@
         <h3>Question</h3>
         <div class="row">
             <div class="col-md">
-                <p>{{ data.question }}</p>
+                <p>{{ question }}</p>
             </div>
         </div>
         <form action="/prob/{{ item_nr }}" method="POST">
-            {% for e in data.options %}
+            {% for e in options %}
             <div class="radio">
                 <label>
                     <input name="option" type="radio" value="{{ e }}"/>

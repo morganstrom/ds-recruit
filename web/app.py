@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, json, request, redirect, url_for, session, flash, g
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
-from model import db, User
+from model import db, User, Response
 from config import BaseConfig
 
 # initialize app
@@ -31,11 +31,17 @@ def showItem(item_nr):
     else:
         # Show current item
         item = item_set[item_nr]
-        return render_template('prob.html', data=item, item_nr=item_nr)
+        return render_template('prob.html', question=item['question'], options=item['options'], item_nr=item_nr)
 
 @app.route('/prob/<int:item_nr>', methods=["POST"])
 @login_required
 def scoreItem(item_nr):
+    # Store response, if one is provided
+    if "option" in request.form.to_dict():
+        new_response = Response(request.form['option'], item_nr, g.user.get_id())
+        db.session.add(new_response)
+        db.session.commit()
+
     # Score item - TBD
 
     # Decide what is the next item based on which button was pressed

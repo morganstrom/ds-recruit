@@ -13,7 +13,7 @@ db = SQLAlchemy(app)
 # create user class
 class User(db.Model):
     __tablename__ = 'users'
-    uid = db.Column(db.Integer, primary_key=True)
+    userid = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(256), unique=True, nullable=False)
@@ -41,10 +41,28 @@ class User(db.Model):
         return False
 
     def get_id(self):
-        return self.uid
+        return self.userid
 
     def __repr__(self):
         return '<User %r>' % self.email
+
+# Create response class
+class Response(db.Model):
+    __tablename__ = 'responses'
+    responseid = db.Column(db.Integer, primary_key=True)
+    responsetime = db.Column(db.DateTime, nullable=False)
+    response = db.Column(db.String(120), nullable=False)
+    itemid = db.Column(db.Integer, nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('users.userid'))
+
+    def __init__(self, response, itemid, userid):
+        self.responsetime = datetime.utcnow()
+        self.response = response
+        self.itemid = itemid
+        self.userid = userid
+
+    def __repr__(self):
+        return '<Response %r>' % self.responseid
 
 
 # Create tables
