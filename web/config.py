@@ -15,3 +15,7 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://%s:%s@%s/%s?charset=utf8' % \
                               (MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_DB)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = False
+    SQLALCHEMY_POOL_SIZE = 5
+    SQLALCHEMY_POOL_RECYCLE = 600
+    SQLALCHEMY_POOL_TIMEOUT = 100

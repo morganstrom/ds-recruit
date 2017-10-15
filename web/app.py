@@ -1,75 +1,26 @@
 # app.py
 
-from flask import Flask, render_template, json, request, redirect, url_for, session
-from werkzeug import generate_password_hash, check_password_hash
+from flask import Flask, render_template, json, request, redirect, url_for, session, flash, g
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from model import db, User
+from config import BaseConfig
 
 # initialize app
 app = Flask(__name__)
+app.config.from_object(BaseConfig)
 
-# Try to create tables
-db.create_all()
-# admin = User(username='admin', email='morgan@clikrecruit.se')
-# db.session.add(admin)
-# db.session.commit()
+# setup login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 @app.route('/')
 def main():
     return render_template('index.html')
 
-
-@app.route('/signup', methods=['GET'])
-def showSignUp():
-    return render_template('signup.html')
-
-
-@app.route('/signup', methods=['POST'])
-def signUp():
-    """Code for creating a user"""
-    try:
-        # Read the posted values from the UI
-        _name = request.form['inputName']
-        _email = request.form['inputEmail']
-        _password = request.form['inputPassword']
-
-        if _name and _email and _password:
-            password_hash = generate_password_hash(_password)
-
-            newuser = User(name=_name,
-                           email=_email,
-                           password=password_hash)
-            db.session.add(newuser)
-            db.session.commit()
-            return redirect(url_for('userHome'))
-        else:
-            return json.dumps({'html': '<span>Enter the required fields</span>'})
-
-    except Exception as e:
-        return json.dumps({'error': str(e)})
-
-
-@app.route('/signin', methods=['GET'])
-def showSignIn():
-    return render_template('signin.html')
-
-@app.route('/signin', methods=['POST'])
-def validateLogin():
-    """Code for validating user login"""
-    pass
-
-@app.route('/home')
-def userHome():
-    if session.get('user'):
-        return render_template('userhome.html')
-    else:
-        return render_template('signin.html')
-
-@app.route('/logout')
-def logout():
-    session.pop('user', None)
-    return redirect(url_for('main'))
-
-@app.route('/prob/<int:item_nr>', methods=["GET"])
+# questionnaire
+@app.route('/prob/<int:item_nr>', methods=['GET'])
+@login_required
 def showItem(item_nr):
     # Load items
     with open("items/probability.json") as data_file:
@@ -83,6 +34,7 @@ def showItem(item_nr):
         return render_template('prob.html', data=item, item_nr=item_nr)
 
 @app.route('/prob/<int:item_nr>', methods=["POST"])
+@login_required
 def scoreItem(item_nr):
     # Score item - TBD
 
@@ -96,6 +48,56 @@ def scoreItem(item_nr):
             next_item = item_nr - 1
 
     return redirect(url_for("showItem", item_nr=next_item, _method="GET"))
+
+# login and logout
+@app.route('/register' , methods=['GET','POST'])
+def register():
+    if request.method == 'GET':
+        return render_template('register.html')
+    user = User(request.form['username'], request.form['email'], request.form['password'])
+    db.session.add(user)
+    db.session.commit()
+    flash('User successfully registered')
+    return redirect(url_for('login'))
+
+@app.route('/login',methods=['GET','POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    username = request.form['username']
+    password = request.form['password']
+    remember_me = False
+    if 'remember_me' in request.form:
+        remember_me = True
+    registered_user = User.query.filter_by(username=username).first()
+    if registered_user is None:
+        flash('Username is invalid', 'error')
+        return redirect(url_for('login'))
+    if not registered_user.check_password(password):
+        flash('Password is invalid', 'error')
+        return redirect(url_for('login'))
+    login_user(registered_user, remember=remember_me)
+    flash('Logged in successfully')
+    return redirect(request.args.get('next') or url_for('main'))
+
+@app.route('/userhome')
+@login_required
+def user_home():
+    return render_template('userhome.html')
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('main'))
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+@app.before_request
+def before_request():
+    g.user = current_user
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
