@@ -38,11 +38,12 @@ def showItem(item_nr):
 def scoreItem(item_nr):
     # Store response, if one is provided
     if "option" in request.form.to_dict():
+        # TODO: Score response
+
+        # Create new response object and commit to database
         new_response = Response(request.form['option'], item_nr, g.user.get_id())
         db.session.add(new_response)
         db.session.commit()
-
-    # Score item - TBD
 
     # Decide what is the next item based on which button was pressed
     if "next" in request.form.to_dict():
