@@ -61,7 +61,7 @@ def scoreItem(item_nr):
 def register():
     if request.method == 'GET':
         return render_template('register.html')
-    user = User(request.form['username'], request.form['email'], request.form['password'])
+    user = User(request.form['user_name'], request.form['email'], request.form['password'])
     db.session.add(user)
     db.session.commit()
     flash('User successfully registered')
@@ -72,12 +72,12 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
 
-    username = request.form['username']
+    user_name = request.form['user_name']
     password = request.form['password']
     remember_me = False
     if 'remember_me' in request.form:
         remember_me = True
-    registered_user = User.query.filter_by(username=username).first()
+    registered_user = User.query.filter_by(user_name=user_name).first()
     if registered_user is None:
         flash('Username is invalid', 'error')
         return redirect(url_for('login'))

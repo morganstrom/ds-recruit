@@ -13,14 +13,14 @@ db = SQLAlchemy(app)
 # create user class
 class User(db.Model):
     __tablename__ = 'users'
-    userid = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(120), nullable=False)
+    user_id = db.Column(db.Integer, primary_key=True)
+    user_name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(256), unique=True, nullable=False)
     registered_on = db.Column(db.DateTime)
 
-    def __init__(self, username, email, password):
-        self.username = username
+    def __init__(self, user_name, email, password):
+        self.user_name = user_name
         self.email = email
         self.set_password(password)
         self.registered_on = datetime.utcnow()
@@ -41,7 +41,7 @@ class User(db.Model):
         return False
 
     def get_id(self):
-        return self.userid
+        return self.user_id
 
     def __repr__(self):
         return '<User %r>' % self.email
@@ -49,20 +49,22 @@ class User(db.Model):
 # Create response class
 class Response(db.Model):
     __tablename__ = 'responses'
-    responseid = db.Column(db.Integer, primary_key=True)
-    responsetime = db.Column(db.DateTime, nullable=False)
+    response_id = db.Column(db.Integer, primary_key=True)
+    response_time = db.Column(db.DateTime, nullable=False)
     response = db.Column(db.String(120), nullable=False)
-    itemid = db.Column(db.Integer, nullable=False)
-    userid = db.Column(db.Integer, db.ForeignKey('users.userid'))
+    question_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
 
-    def __init__(self, response, itemid, userid):
-        self.responsetime = datetime.utcnow()
+    def __init__(self, response, question_id, user_id):
+        self.response_time = datetime.utcnow()
         self.response = response
-        self.itemid = itemid
-        self.userid = userid
+        self.question_id = question_id
+        self.user_id = user_id
 
     def __repr__(self):
-        return '<Response %r>' % self.responseid
+        return '<Response %r>' % self.response_id
+
+# Create question class
 
 
 # Create tables
