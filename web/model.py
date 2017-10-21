@@ -46,24 +46,6 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.user_name
 
-# Create response class
-class Response(db.Model):
-    __tablename__ = 'responses'
-    response_id = db.Column(db.Integer, primary_key=True)
-    response_time = db.Column(db.DateTime, nullable=False)
-    response = db.Column(db.String(120), nullable=False)
-    question_id = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-
-    def __init__(self, response, question_id, user_id):
-        self.response_time = datetime.utcnow()
-        self.response = response
-        self.question_id = question_id
-        self.user_id = user_id
-
-    def __repr__(self):
-        return '<Response %r>' % self.response_id
-
 # Create question class
 class Question(db.Model):
     __tablename__ = 'questions'
@@ -75,8 +57,32 @@ class Question(db.Model):
         self.question_key = question_key
         self.question_data = question_data
 
+    def get_key(self):
+        return self.question_key
+
+    def get_data(self):
+        return self.question_data
+
     def __repr__(self):
         return '<Question %r' % self.question_key
+
+# Create response class
+class Response(db.Model):
+    __tablename__ = 'responses'
+    response_id = db.Column(db.Integer, primary_key=True)
+    response_time = db.Column(db.DateTime, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    question_key = db.Column(db.String(16), nullable=False)
+    response = db.Column(db.String(120), nullable=False)
+
+    def __init__(self, response, question_key, user_id):
+        self.response_time = datetime.utcnow()
+        self.response = response
+        self.question_key = question_key
+        self.user_id = user_id
+
+    def __repr__(self):
+        return '<Response %r>' % self.response_id
 
 
 # Create tables

@@ -27,43 +27,47 @@ with open("items/probability.json") as data_file:
 def main():
     return render_template('index.html')
 
-# questionnaire
-@app.route('/prob/<int:item_nr>', methods=['GET'])
+# Questionnaire
+@app.route('/prob/')
 @login_required
-def showItem(item_nr):
-    # Load items
-    with open("items/probability.json") as data_file:
-        item_set = json.load(data_file)
-    # Check for end of test
-    if item_nr >= len(item_set):
-        return "test over!"
-    else:
-        # Show current item
-        item = item_set[item_nr]
-        return render_template('prob.html', question=item['question'], options=item['options'], item_nr=item_nr)
+def show_questionnaire():
+    # TODO: set g.current_question at the start page for the questionnaire?
+    # TODO: Create starting page for questionnaire
+    return render_template('error.html')
 
-@app.route('/prob/<int:item_nr>', methods=["POST"])
+@app.route('/prob/<question_key>', methods=['GET'])
 @login_required
-def scoreItem(item_nr):
+def show_question(question_key):
+    # Load question
+    question = Question.query.filter_by(question_key=question_key).first()
+
+    # TODO: Check for end of test
+
+    # Show current item
+    question_data = question.get_data()
+    return render_template('prob.html',
+                           question_key=question_key,
+                           question=question_data['question'],
+                           options=question_data['options'])
+
+@app.route('/prob/<question_key>', methods=["POST"])
+@login_required
+def process_response(question_key):
     # Store response, if one is provided
     if "option" in request.form.to_dict():
         # TODO: Score response
 
         # Create new response object and commit to database
-        new_response = Response(request.form['option'], item_nr, g.user.get_id())
-        db.session.add(new_response)
+        response = Response(request.form['option'],
+                            question_key,
+                            g.user.get_id())
+        db.session.add(response)
         db.session.commit()
 
-    # Decide what is the next item based on which button was pressed
-    if "next" in request.form.to_dict():
-        next_item = item_nr + 1
-    else:
-        if item_nr - 1 < 0:
-            next_item = item_nr
-        else:
-            next_item = item_nr - 1
+    # TODO: Decide what is the next item based on which button was pressed
+    next_question = question_key
 
-    return redirect(url_for("showItem", item_nr=next_item, _method="GET"))
+    return redirect(url_for("show_question", question_key=next_question, _method="GET"))
 
 # login and logout
 @app.route('/register' , methods=['GET','POST'])

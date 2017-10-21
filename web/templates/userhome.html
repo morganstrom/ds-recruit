@@ -2,7 +2,7 @@
 {% block title %}Home{% endblock %}
 {% block content %}
     <div class="jumbotron">
-        <h1>Welcome Home {{ g.get('user', None) }}!</h1>
+        <h1>Welcome Home {{ g.user }}!</h1>
         <a href="/prob/0">Go to test</a>
     </div>
 {% endblock %}
