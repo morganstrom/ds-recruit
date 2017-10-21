@@ -2,17 +2,26 @@
 
 from flask import Flask, render_template, json, request, redirect, url_for, session, flash, g
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
-from model import db, User, Response
+from model import db, User, Response, Question
 from config import BaseConfig
 
-# initialize app
+# Initialize app
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
 
-# setup login manager
+# Setup login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+# Batch upload questions from JSON
+with open("items/probability.json") as data_file:
+    question_set = json.load(data_file)
+    for q in question_set:
+        question = Question(q, question_set[q])
+        db.session.add(question)
+    db.session.commit()
+
 
 @app.route('/')
 def main():

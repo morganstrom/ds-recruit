@@ -14,7 +14,7 @@ db = SQLAlchemy(app)
 class User(db.Model):
     __tablename__ = 'users'
     user_id = db.Column(db.Integer, primary_key=True)
-    user_name = db.Column(db.String(120), nullable=False)
+    user_name = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(256), unique=True, nullable=False)
     registered_on = db.Column(db.DateTime)
@@ -44,7 +44,7 @@ class User(db.Model):
         return self.user_id
 
     def __repr__(self):
-        return '<User %r>' % self.email
+        return '<User %r>' % self.user_name
 
 # Create response class
 class Response(db.Model):
@@ -65,6 +65,18 @@ class Response(db.Model):
         return '<Response %r>' % self.response_id
 
 # Create question class
+class Question(db.Model):
+    __tablename__ = 'questions'
+    question_id = db.Column(db.Integer, primary_key=True)
+    question_key = db.Column(db.String(16), nullable=False)
+    question_data = db.Column(db.JSON, nullable=False)
+
+    def __init__(self, question_key, question_data):
+        self.question_key = question_key
+        self.question_data = question_data
+
+    def __repr__(self):
+        return '<Question %r' % self.question_key
 
 
 # Create tables
