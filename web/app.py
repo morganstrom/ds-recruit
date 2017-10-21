@@ -18,7 +18,7 @@ login_manager.login_view = 'login'
 with open("items/probability.json") as data_file:
     question_set = json.load(data_file)
     for q in question_set:
-        question = Question(q, question_set[q])
+        question = Question(q, question_set[q], question_set[q]['solution'])
         db.session.add(question)
     db.session.commit()
 
@@ -31,7 +31,7 @@ def main():
 @app.route('/prob/')
 @login_required
 def show_questionnaire():
-    # TODO: set g.current_question at the start page for the questionnaire?
+    # TODO: set g.current_question_nr at the start page for the questionnaire?
     # TODO: Create starting page for questionnaire
     return render_template('error.html')
 
@@ -40,11 +40,14 @@ def show_questionnaire():
 def show_question(question_key):
     # Load question
     question = Question.query.filter_by(question_key=question_key).first()
+    if (question == None):
+        return render_template('error.html', error='404: Question not found')
+    else:
+        question_data = question.get_data()
 
-    # TODO: Check for end of test
+    # TODO: Check for end of test (using g.current_question_nr)
 
     # Show current item
-    question_data = question.get_data()
     return render_template('prob.html',
                            question_key=question_key,
                            question=question_data['question'],
@@ -55,14 +58,25 @@ def show_question(question_key):
 def process_response(question_key):
     # Store response, if one is provided
     if "option" in request.form.to_dict():
-        # TODO: Score response
+        # Get response
+        resp = request.form['option']
 
-        # Create new response object and commit to database
-        response = Response(request.form['option'],
-                            question_key,
-                            g.user.get_id())
-        db.session.add(response)
-        db.session.commit()
+        # Load question
+        question = Question.query.filter_by(question_key=question_key).first()
+
+        if (question == None):
+            return render_template('error.html', error='404: Question not found')
+        else:
+            # Score response
+            score = question.score_response(resp)
+
+            # Create new response object and commit to database
+            response = Response(g.user.get_id(),
+                                question_key,
+                                resp,
+                                score)
+            db.session.add(response)
+            db.session.commit()
 
     # TODO: Decide what is the next item based on which button was pressed
     next_question = question_key

@@ -52,16 +52,24 @@ class Question(db.Model):
     question_id = db.Column(db.Integer, primary_key=True)
     question_key = db.Column(db.String(16), nullable=False)
     question_data = db.Column(db.JSON, nullable=False)
+    question_solution = db.Column(db.String(64), nullable=False)
 
-    def __init__(self, question_key, question_data):
+    def __init__(self, question_key, question_data, question_solution):
         self.question_key = question_key
         self.question_data = question_data
+        self.question_solution = question_solution
 
     def get_key(self):
         return self.question_key
 
     def get_data(self):
         return self.question_data
+
+    def score_response(self, response):
+        if eval(self.question_solution):
+            return 1
+        else:
+            return 0
 
     def __repr__(self):
         return '<Question %r' % self.question_key
@@ -74,12 +82,15 @@ class Response(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     question_key = db.Column(db.String(16), nullable=False)
     response = db.Column(db.String(120), nullable=False)
+    score = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, response, question_key, user_id):
-        self.response_time = datetime.utcnow()
-        self.response = response
-        self.question_key = question_key
+    def __init__(self, user_id, question_key, response, score):
         self.user_id = user_id
+        self.question_key = question_key
+        self.response = response
+        self.score = score
+        self.response_time = datetime.utcnow()
+
 
     def __repr__(self):
         return '<Response %r>' % self.response_id
