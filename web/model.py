@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, json
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import generate_password_hash, check_password_hash
@@ -50,7 +50,7 @@ class User(db.Model):
 class Question(db.Model):
     __tablename__ = 'questions'
     question_id = db.Column(db.Integer, primary_key=True)
-    question_key = db.Column(db.String(16), nullable=False)
+    question_key = db.Column(db.String(16), unique=True, nullable=False)
     question_data = db.Column(db.JSON, nullable=False)
     question_solution = db.Column(db.String(64), nullable=False)
 
@@ -58,6 +58,9 @@ class Question(db.Model):
         self.question_key = question_key
         self.question_data = question_data
         self.question_solution = question_solution
+
+    def get_id(self):
+        return self.question_id
 
     def get_key(self):
         return self.question_key
@@ -80,13 +83,13 @@ class Response(db.Model):
     response_id = db.Column(db.Integer, primary_key=True)
     response_time = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    question_key = db.Column(db.String(16), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'), nullable=False)
     response = db.Column(db.String(120), nullable=False)
     score = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, user_id, question_key, response, score):
+    def __init__(self, user_id, question_id, response, score):
         self.user_id = user_id
-        self.question_key = question_key
+        self.question_id = question_id
         self.response = response
         self.score = score
         self.response_time = datetime.utcnow()

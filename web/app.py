@@ -15,13 +15,19 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # Batch upload questions from JSON
-with open("items/probability.json") as data_file:
-    question_set = json.load(data_file)
-    for q in question_set:
-        question = Question(q, question_set[q], question_set[q]['solution'])
-        db.session.add(question)
-    db.session.commit()
-
+@app.before_first_request
+def insert_questions():
+    # Check if questions have not been inserted
+    if (len(Question.query.all()) == 0):
+        # Open json file
+        with open("items/probability.json") as data_file:
+            question_set = json.load(data_file)
+            # Insert all questions into database
+            for q in question_set:
+                # Todo: Split out question and options to separate fields and drop data JSON blob
+                question = Question(q, question_set[q], question_set[q]['solution'])
+                db.session.add(question)
+            db.session.commit()
 
 @app.route('/')
 def main():
@@ -40,14 +46,28 @@ def show_questionnaire():
 def show_question(question_key):
     # Load question
     question = Question.query.filter_by(question_key=question_key).first()
+
+    # Get list of answered question ids
+    # TODO: move functionality to Response object?
+    previous_responses = Response \
+        .query \
+        .filter_by(user_id=g.user.get_id()) \
+        .group_by(Response.question_id) \
+        .with_entities(Response.question_id).all()
+    answered_question_ids = list(map(lambda resp: resp.question_id, previous_responses))
+
+    # Check if the question exists
     if (question == None):
         return render_template('error.html', error='404: Question not found')
-    else:
-        question_data = question.get_data()
 
-    # TODO: Check for end of test (using g.current_question_nr)
+    # Check if the current user has already responded to this question
+    if (question.get_id() in answered_question_ids):
+        return render_template('error.html', error='You have already answered question %r' % question_key)
 
-    # Show current item
+    # Get question data
+    question_data = question.get_data()
+
+    # Show current question
     return render_template('prob.html',
                            question_key=question_key,
                            question=question_data['question'],
@@ -64,22 +84,49 @@ def process_response(question_key):
         # Load question
         question = Question.query.filter_by(question_key=question_key).first()
 
+        # Check if the question exists
         if (question == None):
             return render_template('error.html', error='404: Question not found')
-        else:
-            # Score response
-            score = question.score_response(resp)
 
-            # Create new response object and commit to database
-            response = Response(g.user.get_id(),
-                                question_key,
-                                resp,
-                                score)
-            db.session.add(response)
-            db.session.commit()
+        # Score response
+        score = question.score_response(resp)
 
-    # TODO: Decide what is the next item based on which button was pressed
-    next_question = question_key
+        # Create new response object and commit to database
+        response = Response(g.user.get_id(),
+                            question.get_id(),
+                            resp,
+                            score)
+        db.session.add(response)
+        db.session.commit()
+
+    # Choose next item
+    # Note that there is no option to go back to a previously answered question
+
+    # Get list of answered question ids
+    # TODO: move functionality to Response object?
+    previous_responses = Response\
+        .query\
+        .filter_by(user_id=g.user.get_id())\
+        .group_by(Response.question_id)\
+        .with_entities(Response.question_id).all()
+    answered_question_ids = list(map(lambda resp: resp.question_id, previous_responses))
+
+    # Get a list of question keys that the current user haven't responded to
+    remaining_questions = Question\
+        .query\
+        .filter(Question.question_id.notin_(answered_question_ids))\
+        .all()
+
+    # If there are no remaining questions, test is over
+    # Todo: Create end of test page
+    if (len(remaining_questions) == 0):
+        return render_template('error.html', error='No more questions!')
+
+    # Todo: Quit the test if the respondent has answered 10 questions
+
+    # Show the first question on the remaining list
+    # Todo: randomize order of questions
+    next_question = remaining_questions[0].get_key()
 
     return redirect(url_for("show_question", question_key=next_question, _method="GET"))
 
