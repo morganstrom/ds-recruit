@@ -31,7 +31,10 @@ def insert_questions():
 
 @app.route('/')
 def main():
-    return render_template('index.html')
+    if g.user.is_authenticated:
+        return render_template('userhome.html')
+    else:
+        return render_template('index.html')
 
 # Questionnaire
 @app.route('/prob/')
@@ -39,7 +42,7 @@ def main():
 def show_questionnaire():
     # TODO: set g.current_question_nr at the start page for the questionnaire?
     # TODO: Create starting page for questionnaire
-    return render_template('error.html')
+    return render_template('error.html', error='Create start page for Probability test..')
 
 @app.route('/prob/<question_key>', methods=['GET'])
 @login_required
@@ -135,7 +138,7 @@ def process_response(question_key):
 def register():
     if request.method == 'GET':
         return render_template('register.html')
-    user = User(request.form['user_name'], request.form['email'], request.form['password'])
+    user = User(request.form['email'], request.form['password'])
     db.session.add(user)
     db.session.commit()
     flash('User successfully registered')
@@ -146,14 +149,14 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
 
-    user_name = request.form['user_name']
+    email = request.form['email']
     password = request.form['password']
     remember_me = False
     if 'remember_me' in request.form:
         remember_me = True
-    registered_user = User.query.filter_by(user_name=user_name).first()
+    registered_user = User.query.filter_by(email=email).first()
     if registered_user is None:
-        flash('Username is invalid', 'error')
+        flash('Email is invalid', 'error')
         return redirect(url_for('login'))
     if not registered_user.check_password(password):
         flash('Password is invalid', 'error')

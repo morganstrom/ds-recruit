@@ -1,8 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-    <div class="jumbotron">
-        <h1>Welcome Home {{ g.user }}!</h1>
-        <a href="/prob/0">Go to test</a>
+    <div class="col">
+        <h1>Welcome Home!</h1>
+        <p>Here be dragons</p>
+        <div class="card border-dark text-center p-4" style="width: 20rem;">
+            <div class="card-body text-dark">
+                <h4 class="card-title">Probability</h4>
+                <p class="card-text">Test your skills in probability theory!</p>
+                <a href="/prob/" class="btn btn-primary">Complete 10 questions</a>
+            </div>
+
+        </div>
     </div>
 {% endblock %}

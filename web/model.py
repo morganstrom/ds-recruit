@@ -14,13 +14,11 @@ db = SQLAlchemy(app)
 class User(db.Model):
     __tablename__ = 'users'
     user_id = db.Column(db.Integer, primary_key=True)
-    user_name = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(256), unique=True, nullable=False)
     registered_on = db.Column(db.DateTime)
 
-    def __init__(self, user_name, email, password):
-        self.user_name = user_name
+    def __init__(self, email, password):
         self.email = email
         self.set_password(password)
         self.registered_on = datetime.utcnow()
@@ -44,7 +42,7 @@ class User(db.Model):
         return self.user_id
 
     def __repr__(self):
-        return '<User %r>' % self.user_name
+        return '<User %r>' % self.email
 
 # Create question class
 class Question(db.Model):
