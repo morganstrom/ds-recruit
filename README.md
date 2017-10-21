@@ -1,8 +1,8 @@
-References:
-http://www.patricksoftwareblog.com/how-to-use-docker-and-docker-compose-to-create-a-flask-application/
-https://code.tutsplus.com/tutorials/creating-a-web-app-from-scratch-using-python-flask-and-mysql--cms-22972
+# ds_recruit
 
+A web application for skill assessment in data science.
+After logging in, users have access to several questionnaires
+related to data science skills.
 
-
-Todo:
-http://www.patricksoftwareblog.com/how-to-configure-nginx-for-a-flask-web-application/
+The app is built in Flask, with a MySQL database and a nginx proxy server.
+It is fully dockerized.

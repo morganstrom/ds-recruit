@@ -1,4 +1,4 @@
-from flask import Flask, json
+from flask import Flask
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import generate_password_hash, check_password_hash
