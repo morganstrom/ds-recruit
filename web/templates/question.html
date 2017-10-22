@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Item{% endblock %}
+{% block title %}Question{% endblock %}
 {% block head %}
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'></script>
 {% endblock %}
@@ -22,8 +22,9 @@
             {% endfor %}
             <div class="d-flex justify-content-center">
                 <div class="btn-group" role="group">
-                    <input name="instructions" type="submit" id="instructions" value="Instructions" class="btn btn-secondary" />
                     <input name="next" type="submit" id="next" value="Next" class="btn btn-primary" />​
+                    <input name="instructions" type="submit" id="instructions" value="Instructions" class="btn btn-secondary" />
+                    <input name="end" type="submit" id="end" value="End test" class="btn btn-secondary" />
                 </div>
             </div>
         </form>

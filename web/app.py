@@ -50,9 +50,9 @@ def show_questionnaire():
         .all()
 
     # If there are no remaining questions, test is over
-    # Todo: Create end of test page
     if (len(remaining_questions) == 0):
-        return render_template('error.html', error='No more questions!')
+        return render_template('questionnaire_end.html',
+                               reason='There are no more questions in the database :(')
 
     # Show the first question on the remaining list
     first_question = remaining_questions[0].get_key()
@@ -90,7 +90,7 @@ def show_question(question_key):
 @login_required
 def process_response(question_key):
     # Store response, if one is provided
-    if "option" in request.form.to_dict():
+    if ("option" in request.form.to_dict()):
         # Get response
         resp = request.form['option']
 
@@ -112,6 +112,10 @@ def process_response(question_key):
         db.session.add(response)
         db.session.commit()
 
+    # Check if user has selected to end test
+    if ("end" in request.form.to_dict()):
+        return render_template('questionnaire_end.html')
+
     # Get list of answered question ids
     answered_question_ids = list(map(lambda r: r.question_id, g.user.responses))
 
@@ -121,9 +125,9 @@ def process_response(question_key):
         .all()
 
     # If there are no remaining questions, test is over
-    # Todo: Create end of test page
     if (len(remaining_questions) == 0):
-        return render_template('error.html', error='No more questions!')
+        return render_template('questionnaire_end.html',
+                               reason='There are no more questions in the database :(')
 
     # Todo: Quit the test if the respondent has answered 10 questions
 
@@ -138,22 +142,37 @@ def process_response(question_key):
 def signup():
     if request.method == 'GET':
         return render_template('signup.html')
-    user = User(request.form['email'], request.form['password'])
-    db.session.add(user)
-    db.session.commit()
-    flash('User successfully registered')
-    return redirect(url_for('signin'))
+
+    # Get field values
+    email = request.form['email']
+    password = request.form['password']
+
+    # Look up user in database
+    registered_user = User.query.filter_by(email=email).first()
+    if registered_user is not None:
+        flash('User with email %r already exist' % email, 'error')
+        return redirect(url_for('signup'))
+    else:
+        # Add user
+        user = User(email, password)
+        db.session.add(user)
+        db.session.commit()
+        flash('User successfully registered')
+        return redirect(url_for('signin'))
 
 @app.route('/signin',methods=['GET','POST'])
 def signin():
     if request.method == 'GET':
         return render_template('signin.html')
 
+    # Get field values
     email = request.form['email']
     password = request.form['password']
     remember_me = False
     if 'remember_me' in request.form:
         remember_me = True
+
+    # Look up user in database
     registered_user = User.query.filter_by(email=email).first()
     if registered_user is None:
         flash('Email is invalid', 'error')
@@ -161,6 +180,8 @@ def signin():
     if not registered_user.check_password(password):
         flash('Password is invalid', 'error')
         return redirect(url_for('signin'))
+
+    # Log in user
     login_user(registered_user, remember=remember_me)
     flash('Logged in successfully')
     return redirect(request.args.get('next') or url_for('main'))
