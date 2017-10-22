@@ -35,7 +35,7 @@ def main():
     else:
         return render_template('index.html')
 
-# Questionnaire
+# Probability questionnaire
 @app.route('/prob/')
 @login_required
 def show_questionnaire():
@@ -64,7 +64,7 @@ def show_question(question_key):
     question_data = question.get_data()
 
     # Show current question
-    return render_template('prob.html',
+    return render_template('question.html',
                            skill_id=question.skill_id,
                            question_key=question_key,
                            question=question_data['question'],
@@ -122,20 +122,20 @@ def process_response(question_key):
     return redirect(url_for("show_question", question_key=next_question, _method="GET"))
 
 # login and logout
-@app.route('/register' , methods=['GET','POST'])
-def register():
+@app.route('/signup' , methods=['GET','POST'])
+def signup():
     if request.method == 'GET':
-        return render_template('register.html')
+        return render_template('signup.html')
     user = User(request.form['email'], request.form['password'])
     db.session.add(user)
     db.session.commit()
     flash('User successfully registered')
-    return redirect(url_for('login'))
+    return redirect(url_for('signin'))
 
-@app.route('/login',methods=['GET','POST'])
-def login():
+@app.route('/signin',methods=['GET','POST'])
+def signin():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('signin.html')
 
     email = request.form['email']
     password = request.form['password']
@@ -145,10 +145,10 @@ def login():
     registered_user = User.query.filter_by(email=email).first()
     if registered_user is None:
         flash('Email is invalid', 'error')
-        return redirect(url_for('login'))
+        return redirect(url_for('signin'))
     if not registered_user.check_password(password):
         flash('Password is invalid', 'error')
-        return redirect(url_for('login'))
+        return redirect(url_for('signin'))
     login_user(registered_user, remember=remember_me)
     flash('Logged in successfully')
     return redirect(request.args.get('next') or url_for('main'))
