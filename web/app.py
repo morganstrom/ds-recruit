@@ -40,8 +40,24 @@ def main():
 @login_required
 def show_questionnaire():
     # TODO: set g.current_question_nr at the start page for the questionnaire?
-    # TODO: Create starting page for questionnaire
-    return render_template('error.html', error='Create start page for Probability test..')
+
+    # Get list of answered question ids
+    answered_question_ids = list(map(lambda r: r.question_id, g.user.responses))
+
+    # Get a list of question keys that the current user haven't responded to
+    remaining_questions = Question.query \
+        .filter(Question.question_id.notin_(answered_question_ids)) \
+        .all()
+
+    # If there are no remaining questions, test is over
+    # Todo: Create end of test page
+    if (len(remaining_questions) == 0):
+        return render_template('error.html', error='No more questions!')
+
+    # Show the first question on the remaining list
+    first_question = remaining_questions[0].get_key()
+
+    return render_template('questionnaire_start.html', first_question=first_question)
 
 @app.route('/prob/<question_key>', methods=['GET'])
 @login_required
@@ -96,15 +112,11 @@ def process_response(question_key):
         db.session.add(response)
         db.session.commit()
 
-    # Choose next item
-    # Note that there is no option to go back to a previously answered question
-
     # Get list of answered question ids
     answered_question_ids = list(map(lambda r: r.question_id, g.user.responses))
 
     # Get a list of question keys that the current user haven't responded to
-    remaining_questions = Question\
-        .query\
+    remaining_questions = Question.query\
         .filter(Question.question_id.notin_(answered_question_ids))\
         .all()
 
@@ -115,7 +127,7 @@ def process_response(question_key):
 
     # Todo: Quit the test if the respondent has answered 10 questions
 
-    # Show the first question on the remaining list
+    # Select the first question on the remaining list
     # Todo: randomize order of questions
     next_question = remaining_questions[0].get_key()
 

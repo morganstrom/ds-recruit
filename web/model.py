@@ -100,6 +100,7 @@ class Response(db.Model):
     def __repr__(self):
         return '<Response %r>' % self.response_id
 
+# Todo: Create results class
 
 # Create tables
 db.create_all()

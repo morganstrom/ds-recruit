@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Probability Questionnaire{% endblock %}
+{% block content %}
+<div class="col">
+    <h1>Probability</h1>
+    <p><b>Test your skills in probability theory!</b></p>
+    <p>You will now get a set of 10 questions.
+        After you've answered them, you will see how your score compares to those of others.</p>
+    <p>Remember, once you have answered a question, you will not be able to go back and change your answer.</p>
+    <a href="/prob/{{ first_question }}" class="btn btn-primary">Start</a>
+</div>
+{% endblock %}
