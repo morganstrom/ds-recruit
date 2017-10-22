@@ -18,6 +18,8 @@ class User(db.Model):
     password = db.Column(db.String(256), unique=True, nullable=False)
     registered_on = db.Column(db.DateTime)
 
+    responses = db.relationship('Response', backref='user', lazy=True)
+
     def __init__(self, email, password):
         self.email = email
         self.set_password(password)
@@ -51,6 +53,8 @@ class Question(db.Model):
     question_key = db.Column(db.String(16), unique=True, nullable=False)
     question_data = db.Column(db.JSON, nullable=False)
     question_solution = db.Column(db.String(64), nullable=False)
+
+    responses = db.relationship('Response', backref='question', lazy=True)
 
     def __init__(self, question_key, question_data, question_solution):
         self.question_key = question_key
@@ -91,7 +95,6 @@ class Response(db.Model):
         self.response = response
         self.score = score
         self.response_time = datetime.utcnow()
-
 
     def __repr__(self):
         return '<Response %r>' % self.response_id

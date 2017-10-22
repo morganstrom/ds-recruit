@@ -50,18 +50,12 @@ def show_question(question_key):
     # Load question
     question = Question.query.filter_by(question_key=question_key).first()
 
-    # Get list of answered question ids
-    # TODO: move functionality to Response object?
-    previous_responses = Response \
-        .query \
-        .filter_by(user_id=g.user.get_id()) \
-        .group_by(Response.question_id) \
-        .with_entities(Response.question_id).all()
-    answered_question_ids = list(map(lambda resp: resp.question_id, previous_responses))
-
     # Check if the question exists
     if (question == None):
         return render_template('error.html', error='404: Question not found')
+
+    # Get list of answered question ids
+    answered_question_ids = list(map(lambda r: r.question_id, g.user.responses))
 
     # Check if the current user has already responded to this question
     if (question.get_id() in answered_question_ids):
@@ -106,13 +100,7 @@ def process_response(question_key):
     # Note that there is no option to go back to a previously answered question
 
     # Get list of answered question ids
-    # TODO: move functionality to Response object?
-    previous_responses = Response\
-        .query\
-        .filter_by(user_id=g.user.get_id())\
-        .group_by(Response.question_id)\
-        .with_entities(Response.question_id).all()
-    answered_question_ids = list(map(lambda resp: resp.question_id, previous_responses))
+    answered_question_ids = list(map(lambda r: r.question_id, g.user.responses))
 
     # Get a list of question keys that the current user haven't responded to
     remaining_questions = Question\
