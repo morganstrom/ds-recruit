@@ -11,7 +11,7 @@
                 <p>{{ question }}</p>
             </div>
         </div>
-        <form action="/prob/{{ item_nr }}" method="POST">
+        <form action="/prob/{{ question_key }}" method="POST">
             {% for e in options %}
             <div class="radio">
                 <label>

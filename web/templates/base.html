@@ -67,12 +67,10 @@
         <div id="main" class="container">
             {% with messages = get_flashed_messages() %}
             {% if messages %}
-            <div class="alert">
-                <ul class="flashes">
+            <div class="alert alert-primary" role="alert">
                     {% for message in messages %}
-                    <li>{{ message }}</li>
+                    <p class="mb-0">{{ message }}</p>
                     {% endfor %}
-                </ul>
             </div>
             {% endif %}
             {% endwith %}
@@ -83,6 +81,7 @@
             {% endblock %}
         </div>
 
+        <hr/>
         <footer class="footer">
             <div class="center">
                 <p>FIND TOP TALENT:</p>

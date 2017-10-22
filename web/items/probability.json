@@ -1,50 +1,79 @@
-[
-	{
-		"uid": "prob0001",
+{
+	"prob0001": {
 		"question": "Let A and B be events on the same sample space, with P (A) = 0.6 and P (B) = 0.7. Can these two events be disjoint?",
-		"options": ["Yes", "No"],
-		"solution": "No"
+		"options": [
+			"Yes",
+			"No"
+		],
+		"solution": "response == 'No'"
 	},
-	{
-		"uid": "prob0002",
+	"prob0002": {
 		"question": "Alice has 2 kids and one of them is a girl. What is the probability that the other child is also a girl? You can assume that there are an equal number of males and females in the world.",
-		"options": [0.5, 0.25, 0.333, 0.75],
-		"solution": 0.333
+		"options": [
+			0.5,
+			0.25,
+			0.333,
+			0.75
+		],
+		"solution": "response == '0.333'"
 	},
-	{
-		"uid": "prob0003",
+	"prob0003": {
 		"question": "A fair six-sided die is rolled twice. What is the probability of getting 2 on the first roll and not getting 4 on the second roll?",
-		"options": ["1/36", "1/18", "5/36", "1/6", "1/3"],
-		"solution": "5/36"
+		"options": [
+			"1/36",
+			"1/18",
+			"5/36",
+			"1/6",
+			"1/3"
+		],
+		"solution": "response == '5/36'"
 	},
-	{
-		"uid": "prob0004",
+	"prob0004": {
 		"question": " $$\\mathbb{P}(A \\cup B \\cup C) = \\mathbb{P}(A \\cap C^c) + \\mathbb{P}(C) + \\mathbb{P}(B \\cap A^c \\cap C^c)$$",
-		"options": ["True", "False"],
-		"solution": "True"
+		"options": [
+			"True",
+			"False"
+		],
+		"solution": "response == 'True'"
 	},
-	{
-		"uid": "prob0005",
+	"prob0005": {
 		"question": "Consider a tetrahedral die and roll it twice. What is the probability that the number on the first roll is strictly higher than the number on the second roll? Note: A tetrahedral die has only four sides (1, 2, 3 and 4).",
-		"options": ["1/2", "3/8", "7/16", "9/16"],
-		"solution": "3/8"
+		"options": [
+			"1/2",
+			"3/8",
+			"7/16",
+			"9/16"
+		],
+		"solution": "response == '3/8'"
 	},
-	{
-		"uid": "prob0008",
+	"prob0006": {
 		"question": "A player is dealt a sequence of 13 cards from a deck of 52 cards. The cards are chosen randomly, one at a time. When choosing a card, the dealer is equally likely to pick any of the cards that remain in the deck. What is the probability that the 13th card is a King?",
-		"options": ["1/52", "1/13", "1/26", "1/12"],
-		"solution": "1/13"
+		"options": [
+			"1/52",
+			"1/13",
+			"1/26",
+			"1/12"
+		],
+		"solution": "response == '1/13'"
 	},
-	{
-		"uid": "prob0009",
+	"prob0007": {
 		"question": "A fair six-sided die is rolled 6 times. What is the probability of all outcomes being unique?",
-		"options": [0.01543, 0.01993, 0.23148, 0.3333],
-		"solution": 0.01543
+		"options": [
+			0.01543,
+			0.01993,
+			0.23148,
+			0.3333
+		],
+		"solution": "response == '0.01543'"
 	},
-	{
-		"uid": "prob0010",
+	"prob0008": {
 		"question": "A group of 60 students is randomly split into 3 classes of equal size. All partitions are equally likely. Jack and Jill are two students belonging to that group. What is the probability that Jack and Jill will end up in the same class?",
-		"options": ["1/3", "19/59", "18/58", "1/2"],
-		"solution": "19/59"
+		"options": [
+			"1/3",
+			"19/59",
+			"18/58",
+			"1/2"
+		],
+		"solution": "response == '19/59'"
 	}
-]
+}

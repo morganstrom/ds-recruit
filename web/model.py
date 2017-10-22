@@ -13,14 +13,14 @@ db = SQLAlchemy(app)
 # create user class
 class User(db.Model):
     __tablename__ = 'users'
-    userid = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(120), nullable=False)
+    user_id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(256), unique=True, nullable=False)
     registered_on = db.Column(db.DateTime)
 
-    def __init__(self, username, email, password):
-        self.username = username
+    responses = db.relationship('Response', backref='user', lazy=True)
+
+    def __init__(self, email, password):
         self.email = email
         self.set_password(password)
         self.registered_on = datetime.utcnow()
@@ -41,28 +41,63 @@ class User(db.Model):
         return False
 
     def get_id(self):
-        return self.userid
+        return self.user_id
 
     def __repr__(self):
         return '<User %r>' % self.email
 
+# Create question class
+class Question(db.Model):
+    __tablename__ = 'questions'
+    question_id = db.Column(db.Integer, primary_key=True)
+    question_key = db.Column(db.String(16), unique=True, nullable=False)
+    question_data = db.Column(db.JSON, nullable=False)
+    question_solution = db.Column(db.String(64), nullable=False)
+
+    responses = db.relationship('Response', backref='question', lazy=True)
+
+    def __init__(self, question_key, question_data, question_solution):
+        self.question_key = question_key
+        self.question_data = question_data
+        self.question_solution = question_solution
+
+    def get_id(self):
+        return self.question_id
+
+    def get_key(self):
+        return self.question_key
+
+    def get_data(self):
+        return self.question_data
+
+    def score_response(self, response):
+        if eval(self.question_solution):
+            return 1
+        else:
+            return 0
+
+    def __repr__(self):
+        return '<Question %r' % self.question_key
+
 # Create response class
 class Response(db.Model):
     __tablename__ = 'responses'
-    responseid = db.Column(db.Integer, primary_key=True)
-    responsetime = db.Column(db.DateTime, nullable=False)
+    response_id = db.Column(db.Integer, primary_key=True)
+    response_time = db.Column(db.DateTime, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'), nullable=False)
     response = db.Column(db.String(120), nullable=False)
-    itemid = db.Column(db.Integer, nullable=False)
-    userid = db.Column(db.Integer, db.ForeignKey('users.userid'))
+    score = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, response, itemid, userid):
-        self.responsetime = datetime.utcnow()
+    def __init__(self, user_id, question_id, response, score):
+        self.user_id = user_id
+        self.question_id = question_id
         self.response = response
-        self.itemid = itemid
-        self.userid = userid
+        self.score = score
+        self.response_time = datetime.utcnow()
 
     def __repr__(self):
-        return '<Response %r>' % self.responseid
+        return '<Response %r>' % self.response_id
 
 
 # Create tables

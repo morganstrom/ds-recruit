@@ -2,65 +2,131 @@
 
 from flask import Flask, render_template, json, request, redirect, url_for, session, flash, g
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
-from model import db, User, Response
+from model import db, User, Response, Question
 from config import BaseConfig
 
-# initialize app
+# Initialize app
 app = Flask(__name__)
 app.config.from_object(BaseConfig)
 
-# setup login manager
+# Setup login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# Batch upload questions from JSON
+@app.before_first_request
+def insert_questions():
+    # Check if questions have not been inserted
+    if (len(Question.query.all()) == 0):
+        # Open json file
+        with open("items/probability.json") as data_file:
+            question_set = json.load(data_file)
+            # Insert all questions into database
+            for q in question_set:
+                # Todo: Split out question and options to separate fields and drop data JSON blob
+                question = Question(q, question_set[q], question_set[q]['solution'])
+                db.session.add(question)
+            db.session.commit()
+
 @app.route('/')
 def main():
-    return render_template('index.html')
-
-# questionnaire
-@app.route('/prob/<int:item_nr>', methods=['GET'])
-@login_required
-def showItem(item_nr):
-    # Load items
-    with open("items/probability.json") as data_file:
-        item_set = json.load(data_file)
-    # Check for end of test
-    if item_nr >= len(item_set):
-        return "test over!"
+    if g.user.is_authenticated:
+        return render_template('userhome.html')
     else:
-        # Show current item
-        item = item_set[item_nr]
-        return render_template('prob.html', question=item['question'], options=item['options'], item_nr=item_nr)
+        return render_template('index.html')
 
-@app.route('/prob/<int:item_nr>', methods=["POST"])
+# Questionnaire
+@app.route('/prob/')
 @login_required
-def scoreItem(item_nr):
+def show_questionnaire():
+    # TODO: set g.current_question_nr at the start page for the questionnaire?
+    # TODO: Create starting page for questionnaire
+    return render_template('error.html', error='Create start page for Probability test..')
+
+@app.route('/prob/<question_key>', methods=['GET'])
+@login_required
+def show_question(question_key):
+    # Load question
+    question = Question.query.filter_by(question_key=question_key).first()
+
+    # Check if the question exists
+    if (question == None):
+        return render_template('error.html', error='404: Question not found')
+
+    # Get list of answered question ids
+    answered_question_ids = list(map(lambda r: r.question_id, g.user.responses))
+
+    # Check if the current user has already responded to this question
+    if (question.get_id() in answered_question_ids):
+        return render_template('error.html', error='You have already answered question %r' % question_key)
+
+    # Get question data
+    question_data = question.get_data()
+
+    # Show current question
+    return render_template('prob.html',
+                           question_key=question_key,
+                           question=question_data['question'],
+                           options=question_data['options'])
+
+@app.route('/prob/<question_key>', methods=["POST"])
+@login_required
+def process_response(question_key):
     # Store response, if one is provided
     if "option" in request.form.to_dict():
-        new_response = Response(request.form['option'], item_nr, g.user.get_id())
-        db.session.add(new_response)
+        # Get response
+        resp = request.form['option']
+
+        # Load question
+        question = Question.query.filter_by(question_key=question_key).first()
+
+        # Check if the question exists
+        if (question == None):
+            return render_template('error.html', error='404: Question not found')
+
+        # Score response
+        score = question.score_response(resp)
+
+        # Create new response object and commit to database
+        response = Response(g.user.get_id(),
+                            question.get_id(),
+                            resp,
+                            score)
+        db.session.add(response)
         db.session.commit()
 
-    # Score item - TBD
+    # Choose next item
+    # Note that there is no option to go back to a previously answered question
 
-    # Decide what is the next item based on which button was pressed
-    if "next" in request.form.to_dict():
-        next_item = item_nr + 1
-    else:
-        if item_nr - 1 < 0:
-            next_item = item_nr
-        else:
-            next_item = item_nr - 1
+    # Get list of answered question ids
+    answered_question_ids = list(map(lambda r: r.question_id, g.user.responses))
 
-    return redirect(url_for("showItem", item_nr=next_item, _method="GET"))
+    # Get a list of question keys that the current user haven't responded to
+    remaining_questions = Question\
+        .query\
+        .filter(Question.question_id.notin_(answered_question_ids))\
+        .all()
+
+    # If there are no remaining questions, test is over
+    # Todo: Create end of test page
+    if (len(remaining_questions) == 0):
+        return render_template('error.html', error='No more questions!')
+
+    # Todo: Quit the test if the respondent has answered 10 questions
+
+    # Show the first question on the remaining list
+    # Todo: randomize order of questions
+    next_question = remaining_questions[0].get_key()
+
+    return redirect(url_for("show_question", question_key=next_question, _method="GET"))
 
 # login and logout
 @app.route('/register' , methods=['GET','POST'])
 def register():
     if request.method == 'GET':
         return render_template('register.html')
-    user = User(request.form['username'], request.form['email'], request.form['password'])
+    user = User(request.form['email'], request.form['password'])
     db.session.add(user)
     db.session.commit()
     flash('User successfully registered')
@@ -71,14 +137,14 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
 
-    username = request.form['username']
+    email = request.form['email']
     password = request.form['password']
     remember_me = False
     if 'remember_me' in request.form:
         remember_me = True
-    registered_user = User.query.filter_by(username=username).first()
+    registered_user = User.query.filter_by(email=email).first()
     if registered_user is None:
-        flash('Username is invalid', 'error')
+        flash('Email is invalid', 'error')
         return redirect(url_for('login'))
     if not registered_user.check_password(password):
         flash('Password is invalid', 'error')
