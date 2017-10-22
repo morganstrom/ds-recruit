@@ -5,47 +5,9 @@
     <h1>Probability</h1>
     <p><b>Thank you for completing the test!</b></p>
     <p>{{ reason }}</p>
-
-    <div class="row justify-content-center">
-        <div class="col col-sm-6 col-align-self-center">
-            <table class="table">
-                <thead class="thead-default">
-                <tr>
-                    <th> </th>
-                    <th>You</th>
-                    <th>Others (average)</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <th scope="row"># Questions</th>
-                    <td>10</td>
-                    <td>8.5</td>
-                </tr>
-                <tr>
-                    <th scope="row"># Correct</th>
-                    <td>5</td>
-                    <td>2.1</td>
-                </tr>
-                <tr>
-                    <th scope="row">% Correct</th>
-                    <td>50%</td>
-                    <td>45%</td>
-                </tr>
-                <tr>
-                    <th scope="row">Total score</th>
-                    <th scope="row">1300</th>
-                    <th scope="row">1000</th>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <p>If you want to improve your results, feel free to complete another set of questions!</p>
     <div class="btn-group" role="group">
+        <a href="/results" class="btn btn-primary">Show results</a>
         <a href="/userhome" class="btn btn-secondary">Back to home</a>
-        <a href="/prob/" class="btn btn-primary">Give me more questions!</a>
     </div>
 </div>
 {% endblock %}

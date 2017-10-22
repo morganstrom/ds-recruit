@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, json, request, redirect, url_for, session, flash, g
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
-from model import db, User, Response, Question
+from model import db, User, Response, Question, Result
 from config import BaseConfig
 
 # Initialize app
@@ -36,6 +36,8 @@ def main():
         return render_template('index.html')
 
 # Probability questionnaire
+
+# Start
 @app.route('/prob/')
 @login_required
 def show_questionnaire():
@@ -59,6 +61,7 @@ def show_questionnaire():
 
     return render_template('questionnaire_start.html', first_question=first_question)
 
+# Show question
 @app.route('/prob/<question_key>', methods=['GET'])
 @login_required
 def show_question(question_key):
@@ -86,6 +89,7 @@ def show_question(question_key):
                            question=question_data['question'],
                            options=question_data['options'])
 
+# Process response
 @app.route('/prob/<question_key>', methods=["POST"])
 @login_required
 def process_response(question_key):
@@ -137,8 +141,36 @@ def process_response(question_key):
 
     return redirect(url_for("show_question", question_key=next_question, _method="GET"))
 
+# Show results
+@app.route('/results', methods=['GET'])
+@login_required
+def show_results():
+    # Count number of responses for user
+    n_questions = len(g.user.responses)
+
+    # Count number of correct responses for user
+    n_correct = sum(map(lambda r: r.score, g.user.responses))
+
+    # Calculate percentage correct
+    if (n_questions > 0):
+        p_correct = (n_correct / n_questions * 100)
+    else:
+        p_correct = None
+
+    # Store in database
+    # Todo: Add skill_id as parameter?
+    result = Result('prob', g.user.get_id(), n_correct)
+    db.session.add(result)
+    db.session.commit()
+
+    # Show results page
+    return render_template('results.html',
+                           n_questions=n_questions,
+                           n_correct=n_correct,
+                           p_correct=p_correct)
+
 # login and logout
-@app.route('/signup' , methods=['GET','POST'])
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'GET':
         return render_template('signup.html')
@@ -160,7 +192,7 @@ def signup():
         flash('User successfully registered')
         return redirect(url_for('signin'))
 
-@app.route('/signin',methods=['GET','POST'])
+@app.route('/signin', methods=['GET', 'POST'])
 def signin():
     if request.method == 'GET':
         return render_template('signin.html')
@@ -189,6 +221,10 @@ def signin():
 @app.route('/userhome')
 @login_required
 def user_home():
+    # Todo: Add form for personal details
+    # Todo: Add functionality to validate email
+    # Todo: Add page with results summary
+    # Todo: Add settings page for changing password & email
     return render_template('userhome.html')
 
 @app.route('/logout')

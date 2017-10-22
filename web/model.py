@@ -1,7 +1,6 @@
 from flask import Flask
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.types import Unicode
 from werkzeug import generate_password_hash, check_password_hash
 
 from config import BaseConfig
@@ -20,6 +19,7 @@ class User(db.Model):
     registered_on = db.Column(db.DateTime)
 
     responses = db.relationship('Response', backref='user', lazy=True)
+    results = db.relationship('Result', backref='user', lazy=True)
 
     def __init__(self, email, password):
         self.email = email
@@ -100,7 +100,21 @@ class Response(db.Model):
     def __repr__(self):
         return '<Response %r>' % self.response_id
 
-# Todo: Create results class
+# Create result class
+class Result(db.Model):
+    __tablename__ = 'results'
+    result_id = db.Column(db.Integer, primary_key=True)
+    skill_id = db.Column(db.String(16), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    total_score = db.Column(db.Numeric)
+
+    def __init__(self, skill_id, user_id, total_score):
+        self.skill_id = skill_id
+        self.user_id = user_id
+        self.total_score = total_score
+
+    def __repr__(self):
+        return '<Result %r>' % self.result_id
 
 # Create tables
 db.create_all()
