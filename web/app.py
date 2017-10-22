@@ -24,8 +24,7 @@ def insert_questions():
             question_set = json.load(data_file)
             # Insert all questions into database
             for q in question_set:
-                # Todo: Split out question and options to separate fields and drop data JSON blob
-                question = Question(q, question_set[q], question_set[q]['solution'])
+                question = Question(q, question_set[q])
                 db.session.add(question)
             db.session.commit()
 

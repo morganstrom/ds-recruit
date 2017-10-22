@@ -1,6 +1,7 @@
 from flask import Flask
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.types import Unicode
 from werkzeug import generate_password_hash, check_password_hash
 
 from config import BaseConfig
@@ -52,14 +53,12 @@ class Question(db.Model):
     question_id = db.Column(db.Integer, primary_key=True)
     question_key = db.Column(db.String(16), unique=True, nullable=False)
     question_data = db.Column(db.JSON, nullable=False)
-    question_solution = db.Column(db.String(64), nullable=False)
 
     responses = db.relationship('Response', backref='question', lazy=True)
 
-    def __init__(self, question_key, question_data, question_solution):
+    def __init__(self, question_key, question_data):
         self.question_key = question_key
         self.question_data = question_data
-        self.question_solution = question_solution
 
     def get_id(self):
         return self.question_id
@@ -71,7 +70,7 @@ class Question(db.Model):
         return self.question_data
 
     def score_response(self, response):
-        if eval(self.question_solution):
+        if eval(self.question_data['solution']):
             return 1
         else:
             return 0
