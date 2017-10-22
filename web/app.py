@@ -54,7 +54,7 @@ def show_questionnaire():
     # If there are no remaining questions, test is over
     if (len(remaining_questions) == 0):
         return render_template('questionnaire_end.html',
-                               reason='There are no more questions in the database :(')
+                               reason='There are no more questions in the database.')
 
     # Show the first question on the remaining list
     first_question = remaining_questions[0].get_key()
@@ -106,6 +106,7 @@ def process_response(question_key):
             return render_template('error.html', error='404: Question not found')
 
         # Score response
+        # Todo: Implement IRT scoring
         score = question.score_response(resp)
 
         # Create new response object and commit to database
@@ -131,7 +132,7 @@ def process_response(question_key):
     # If there are no remaining questions, test is over
     if (len(remaining_questions) == 0):
         return render_template('questionnaire_end.html',
-                               reason='There are no more questions in the database :(')
+                               reason='There are no more questions in the database.')
 
     # Todo: Quit the test if the respondent has answered 10 questions
 
@@ -153,21 +154,43 @@ def show_results():
 
     # Calculate percentage correct
     if (n_questions > 0):
-        p_correct = (n_correct / n_questions * 100)
+        p_correct = round(n_correct / n_questions * 100, 0)
     else:
         p_correct = None
 
     # Store in database
     # Todo: Add skill_id as parameter?
-    result = Result('prob', g.user.get_id(), n_correct)
-    db.session.add(result)
-    db.session.commit()
+
+    # Look for existing records
+    registered_result = Result.query\
+        .filter(Result.user_id == g.user.get_id())\
+        .filter(Result.skill_id == 'prob')\
+        .first()
+
+    # If none, create new
+    if (registered_result == None):
+        result = Result('prob', g.user.get_id(), n_correct)
+        db.session.add(result)
+        db.session.commit()
+    # Else, update existing record
+    else:
+        # Todo: implement IRT total score
+        registered_result.total_score = n_correct
+        db.session.commit()
+
+    # Todo: get average from all users
+    avg_n_questions = 'Not enough data'
+    avg_n_correct = 'Not enough data'
+    avg_p_correct = 'Not enough data'
 
     # Show results page
     return render_template('results.html',
                            n_questions=n_questions,
                            n_correct=n_correct,
-                           p_correct=p_correct)
+                           p_correct=p_correct,
+                           avg_n_questions=avg_n_questions,
+                           avg_n_correct=avg_n_correct,
+                           avg_p_correct=avg_p_correct)
 
 # login and logout
 @app.route('/signup', methods=['GET', 'POST'])
@@ -190,12 +213,12 @@ def signup():
         db.session.add(user)
         db.session.commit()
         flash('User successfully registered')
-        return redirect(url_for('signin'))
+        return redirect(url_for('login'))
 
-@app.route('/signin', methods=['GET', 'POST'])
-def signin():
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     if request.method == 'GET':
-        return render_template('signin.html')
+        return render_template('login.html')
 
     # Get field values
     email = request.form['email']
@@ -208,10 +231,10 @@ def signin():
     registered_user = User.query.filter_by(email=email).first()
     if registered_user is None:
         flash('Email is invalid', 'error')
-        return redirect(url_for('signin'))
+        return redirect(url_for('login'))
     if not registered_user.check_password(password):
         flash('Password is invalid', 'error')
-        return redirect(url_for('signin'))
+        return redirect(url_for('login'))
 
     # Log in user
     login_user(registered_user, remember=remember_me)
