@@ -24,7 +24,7 @@ def insert_questions():
             question_set = json.load(data_file)
             # Insert all questions into database
             for q in question_set:
-                question = Question(q, question_set[q])
+                question = Question("prob", q, question_set[q])
                 db.session.add(question)
             db.session.commit()
 
@@ -65,6 +65,7 @@ def show_question(question_key):
 
     # Show current question
     return render_template('prob.html',
+                           skill_id=question.skill_id,
                            question_key=question_key,
                            question=question_data['question'],
                            options=question_data['options'])

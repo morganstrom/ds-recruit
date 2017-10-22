@@ -51,12 +51,14 @@ class User(db.Model):
 class Question(db.Model):
     __tablename__ = 'questions'
     question_id = db.Column(db.Integer, primary_key=True)
+    skill_id = db.Column(db.String(16), nullable=False)
     question_key = db.Column(db.String(16), unique=True, nullable=False)
     question_data = db.Column(db.JSON, nullable=False)
 
     responses = db.relationship('Response', backref='question', lazy=True)
 
-    def __init__(self, question_key, question_data):
+    def __init__(self, skill_id, question_key, question_data):
+        self.skill_id = skill_id
         self.question_key = question_key
         self.question_data = question_data
 
