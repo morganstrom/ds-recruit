@@ -5,38 +5,55 @@ from scipy.stats import norm
 # Using Expected A Posteriori method
 # http://onlinelibrary.wiley.com/doi/10.1002/ets2.12057/full
 
-def set_norm_prior(mean=0, sd=1):
+def quadrature_points(k=33):
     """
-    Normal prior distribution of theta with 33 quadrature points
+    Returns a numpy array of quadrature points along the
+    ability scale, going from -4 to 4 with k quadrature points
+    :param k: Number of quadrature points
+    :return: Numpy array of quadrature points
     """
-    theta = np.arange(-4, 4.25, 0.25)
+    return np.linspace(-4, 4, k)
+
+
+def prior(theta, mean=0, sd=1):
+    """
+    Prior with normal distribution, returning probability mass function
+    at each quadrature point in theta.
+    :param theta: Array of quadrature points
+    :param mean: Mean of prior distribution (center)
+    :param sd: Standard deviation of prior distribution (scale)
+    :return: Numpy array representing quadrature
+    weights for each element in theta
+    """
     return norm.pdf(theta, mean, sd)
 
-def prob_correct_response(theta, a, b, D=1.702):
-    """
-    Calculates probability of correct response given skill level theta
-    and item difficulty (b) and discrimination (a).
-    D is a scaling parameter, defaulting to 1.702
-    """
-    # Length of array theta
-    n = len(theta)
-    # Likelihood at each theta
-    L = np.repeat(D, n) * np.repeat(a, n) * (theta - np.repeat(b, n))
-    # Probability at each theta
-    p = np.ones(n) / (np.ones(n) + np.exp(-L))
-    return p
 
-def joint_probability(p_correct, score):
+def p_correct(theta, a, b):
     """
-    Calculates joint probability from expected probability of answering
-    correctly and observed score
-    :param p_correct: probability of correct response
-    :param score: 1 if correct response, 0 if incorrect
-    :return: array of joint probabilities
+    Probability of answering a question of a certain difficulty and discrimination
+    correctly, given the individual's ability theta.
+    :param theta: Array of quadrature points along ability scale
+    :param a: double representing item discrimination
+    :param b: double representing item difficulty
+    :return: Array of probabilities for answering correctly for each theta
     """
-    pass
+    z = a * (theta - b)
+    return 1.0 / (1 + np.exp(-z))
 
 
-def update_theta_eap():
-    pass
+def likelihood(theta, a, b, x):
+    #a = np.repeat(1.0, 5)
+    #b = np.array([-2.155, -0.245, 0.206, 0.984, 1.211])
+    #x = np.array([1, 1, 0, 0, 0])
+    p = np.zeros((len(theta), len(x)))
+    for i in np.arange(len(x)):
+        p_ = p_correct(theta, a[i], b[i])
+        p[:, i] = np.power(p_, x[i]) * np.power(1 - p_, 1 - x[i])
+    return np.prod(p, axis = 1)
 
+
+def eap(theta, L, A):
+    return np.sum(theta * L * A) / np.sum(L * A)
+
+def eapSD(theta_hat, theta, L, A):
+    return np.sqrt(np.sum(np.power(theta - theta_hat, 2) * L * A) / np.sum(L * A))
