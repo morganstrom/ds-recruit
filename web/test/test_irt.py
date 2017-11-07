@@ -55,35 +55,31 @@ class TestIrtMethods(unittest.TestCase):
 
     def test_successive_responses(self):
         # Step 1
-        theta = irt.quadrature_points(10)
+        theta = irt.quadrature_points(33)
         theta_w = irt.quadrature_weights(theta, 0, 1)
         L = irt.likelihood(theta, 1., -2.155, 1)
         theta_hat = irt.eap(theta, L, theta_w)
         theta_psd = irt.eap_psd(theta_hat, theta, L, theta_w)
 
         # Step 2
-        theta = irt.quadrature_points(10)
         theta_w = irt.quadrature_weights(theta, theta_hat, theta_psd)
         L = irt.likelihood(theta, 1., -0.245, 1)
         theta_hat = irt.eap(theta, L, theta_w)
         theta_psd = irt.eap_psd(theta_hat, theta, L, theta_w)
 
         # Step 3
-        theta = irt.quadrature_points(10)
         theta_w = irt.quadrature_weights(theta, theta_hat, theta_psd)
         L = irt.likelihood(theta, 1., 0.206, 0)
         theta_hat = irt.eap(theta, L, theta_w)
         theta_psd = irt.eap_psd(theta_hat, theta, L, theta_w)
 
         # Step 4
-        theta = irt.quadrature_points(10)
         theta_w = irt.quadrature_weights(theta, theta_hat, theta_psd)
         L = irt.likelihood(theta, 1., 0.984, 0)
         theta_hat = irt.eap(theta, L, theta_w)
         theta_psd = irt.eap_psd(theta_hat, theta, L, theta_w)
 
         # Step 5
-        theta = irt.quadrature_points(10)
         theta_w = irt.quadrature_weights(theta, theta_hat, theta_psd)
         L = irt.likelihood(theta, 1., 1.211, 0)
         theta_hat = irt.eap(theta, L, theta_w)

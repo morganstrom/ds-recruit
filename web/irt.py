@@ -32,13 +32,24 @@ def p_correct(theta, a, b):
     """
     Probability of answering a question of a certain difficulty and discrimination
     correctly, given an array of possible theta quadrature points.
-    :param theta: Array of quadrature points along ability scale
-    :param a: double representing item discrimination
-    :param b: double representing item difficulty
-    :return: Array of probabilities for answering correctly for each quadrature point
+    :param theta: Array of k quadrature points along ability scale
+    :param a: Array of n item discrimination parameters
+    :param b: Array of n item difficulty parameters
+    :return: Array of length k, probabilities for answering correctly for each quadrature point
     """
-    z = a * (theta - b)
-    return 1.0 / (1 + np.exp(-z))
+    theta = np.array(theta)
+    a = np.array(a)
+    b = np.array(b)
+
+    k = theta.size
+    n = a.size
+
+    theta_mat = np.tile(theta, (n, 1)).T
+    a_mat = np.tile(a, (k, 1))
+    b_mat = np.tile(b, (k, 1))
+
+    z_mat = a_mat * (theta_mat - b_mat)
+    return np.ones_like(z_mat) / (np.ones_like(z_mat) + np.exp(-z_mat))
 
 
 def likelihood(theta, a, b, x):
@@ -50,17 +61,9 @@ def likelihood(theta, a, b, x):
     :param x: Array of k question scores (1 or 0)
     :return: Array of likelihood values for each quadrature point in theta
     """
-    # Todo: Check that a, b and x have all the same length
-    # Todo: Get rid of for-loop, extend p_correct to handle arrays of a and b
-    if (type(x).__name__ == 'int'):
-        p_ = p_correct(theta, a, b)
-        return np.power(p_, x) * np.power(1 - p_, 1 - x)
-    else:
-        p = np.zeros((len(theta), len(x)))
-        for i in np.arange(len(x)):
-            p_ = p_correct(theta, a[i], b[i])
-            p[:, i] = np.power(p_, x[i]) * np.power(1 - p_, 1 - x[i])
-        return np.prod(p, axis = 1)
+    p_ = p_correct(theta, a, b)
+    p = np.power(p_, x) * np.power(1 - p_, 1 - x)
+    return np.prod(p, axis = 1)
 
 
 def eap(theta, L, theta_w):
