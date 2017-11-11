@@ -4,6 +4,7 @@ from flask import Flask, render_template, json, request, redirect, url_for, sess
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from model import db, User, Response, Question, Result
 from config import BaseConfig
+import irt
 
 # Initialize app
 app = Flask(__name__)
@@ -105,8 +106,14 @@ def process_response(question_key):
         if (question == None):
             return render_template('error.html', error='404: Question not found')
 
+        # Get list of answered question ids
+        answered_question_ids = list(map(lambda r: r.question_id, g.user.responses))
+
+        # Check if the current user has already responded to this question
+        if (question.get_id() in answered_question_ids):
+            return render_template('error.html', error='You have already answered question %r' % question_key)
+
         # Score response
-        # Todo: Implement IRT scoring
         score = question.score_response(resp)
 
         # Create new response object and commit to database
@@ -116,6 +123,37 @@ def process_response(question_key):
                             score)
         db.session.add(response)
         db.session.commit()
+
+        # Update ability estimate
+        # Set quadrature points for EAP estimation
+        theta = irt.quadrature_points(33)
+
+        # Look for existing records of ability estimate
+        registered_result = Result.query \
+            .filter(Result.user_id == g.user.get_id()) \
+            .filter(Result.skill_id == 'prob') \
+            .first()
+
+        if (registered_result == None):
+            # If no record exists, set prior to standard normal distribution
+            prior = irt.quadrature_weights(theta, 0, 1)
+            # Update EAP and PSD for ability estimate
+            eap, psd = question.update_eap(score, theta, prior)
+            # Create record
+            result = Result('prob', g.user.get_id(), eap.item(), psd.item())
+            db.session.add(result)
+            db.session.commit()
+        else:
+            # Else, set prior using estimated eap and psd
+            prior = irt.quadrature_weights(theta,
+                                           registered_result.get_eap(),
+                                           registered_result.get_psd())
+            # Update EAP and PSD for ability estimate
+            eap, psd = question.update_eap(score, theta, prior)
+            # Update existing record
+            registered_result.eap_estimate = eap.item()
+            registered_result.psd_estimate = psd.item()
+            db.session.commit()
 
     # Check if user has selected to end test
     if ("end" in request.form.to_dict()):
@@ -158,36 +196,29 @@ def show_results():
     else:
         p_correct = None
 
-    # Store in database
-    # Todo: Add skill_id as parameter?
-
-    # Look for existing records
-    registered_result = Result.query\
-        .filter(Result.user_id == g.user.get_id())\
-        .filter(Result.skill_id == 'prob')\
-        .first()
-
-    # If none, create new
-    if (registered_result == None):
-        result = Result('prob', g.user.get_id(), n_correct)
-        db.session.add(result)
-        db.session.commit()
-    # Else, update existing record
-    else:
-        # Todo: implement IRT total score
-        registered_result.total_score = n_correct
-        db.session.commit()
-
     # Todo: get average from all users
     avg_n_questions = 'Not enough data'
     avg_n_correct = 'Not enough data'
     avg_p_correct = 'Not enough data'
+
+    # Get ability estimate from database
+    registered_result = Result.query \
+        .filter(Result.user_id == g.user.get_id()) \
+        .filter(Result.skill_id == 'prob') \
+        .first()
+
+    # If no record is found, set to no data
+    if (registered_result == None):
+        eap_estimate = 'No data'
+    else:
+        eap_estimate = registered_result.get_eap() * 100 + 1000
 
     # Show results page
     return render_template('results.html',
                            n_questions=n_questions,
                            n_correct=n_correct,
                            p_correct=p_correct,
+                           eap_estimate=eap_estimate,
                            avg_n_questions=avg_n_questions,
                            avg_n_correct=avg_n_correct,
                            avg_p_correct=avg_p_correct)

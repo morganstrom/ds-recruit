@@ -2,6 +2,7 @@ from flask import Flask
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import generate_password_hash, check_password_hash
+import irt
 
 from config import BaseConfig
 
@@ -54,6 +55,8 @@ class Question(db.Model):
     skill_id = db.Column(db.String(16), nullable=False)
     question_key = db.Column(db.String(16), unique=True, nullable=False)
     question_data = db.Column(db.JSON, nullable=False)
+    #a = db.Column(db.Numeric, nullable=False)
+    #b = db.Column(db.Numeric, nullable=False)
 
     responses = db.relationship('Response', backref='question', lazy=True)
 
@@ -61,6 +64,9 @@ class Question(db.Model):
         self.skill_id = skill_id
         self.question_key = question_key
         self.question_data = question_data
+        # Todo: Set difficulty and discrimination parameters while creating database
+        #self.a = 1.0
+        #self.b = 0.0
 
     def get_id(self):
         return self.question_id
@@ -72,10 +78,19 @@ class Question(db.Model):
         return self.question_data
 
     def score_response(self, response):
+        # Evaluate scoring function defined in the solution field
+        # as a function of response, returning true or false
         if eval(self.question_data['solution']):
             return 1
         else:
             return 0
+
+    def update_eap(self, score, theta, theta_w):
+        # Todo: use a and b variables, not constants
+        L = irt.likelihood(theta, 1.0, 0.0, score)
+        eap = irt.eap(theta, L, theta_w)
+        psd = irt.eap_psd(eap, theta, L, theta_w)
+        return eap, psd
 
     def __repr__(self):
         return '<Question %r' % self.question_key
@@ -106,12 +121,20 @@ class Result(db.Model):
     result_id = db.Column(db.Integer, primary_key=True)
     skill_id = db.Column(db.String(16), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    total_score = db.Column(db.Numeric)
+    eap_estimate = db.Column(db.Float, nullable=False)
+    psd_estimate = db.Column(db.Float, nullable=False)
 
-    def __init__(self, skill_id, user_id, total_score):
+    def __init__(self, skill_id, user_id, eap, psd):
         self.skill_id = skill_id
         self.user_id = user_id
-        self.total_score = total_score
+        self.eap_estimate = eap
+        self.psd_estimate = psd
+
+    def get_eap(self):
+        return self.eap_estimate
+
+    def get_psd(self):
+        return self.psd_estimate
 
     def __repr__(self):
         return '<Result %r>' % self.result_id
