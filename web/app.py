@@ -5,6 +5,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 from model import db, User, Response, Question, Result
 from config import BaseConfig
 import irt
+import math
 
 # Initialize app
 app = Flask(__name__)
@@ -211,7 +212,7 @@ def show_results():
     if (registered_result == None):
         eap_estimate = 'No data'
     else:
-        eap_estimate = registered_result.get_eap() * 100 + 1000
+        eap_estimate = math.floor(registered_result.get_eap() * 100 + 1000)
 
     # Show results page
     return render_template('results.html',
