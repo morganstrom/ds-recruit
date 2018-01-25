@@ -5,6 +5,7 @@ from scipy.stats import norm
 # Using Expected A Posteriori method
 # http://onlinelibrary.wiley.com/doi/10.1002/ets2.12057/full
 
+
 def quadrature_points(k=33):
     """
     Returns a numpy array of quadrature points along the
@@ -19,19 +20,27 @@ def quadrature_weights(theta, mean=0, sd=1):
     """
     Prior with normal distribution, returning probability mass function
     at each quadrature point in theta.
-    :param theta: Array of quadrature points
+    :param theta: Array of k quadrature points
     :param mean: Mean of prior distribution (center)
     :param sd: Standard deviation of prior distribution (scale)
-    :return: Numpy array representing quadrature
-    weights for each element in theta
+    :return: Numpy array of k quadrature weights for each quadrature point in theta
     """
     return norm.pdf(theta, mean, sd)
+
+
+def normalize_pmf(pmf):
+    """
+    Normalizes a probability mass function, so that the values sum to 1
+    :param pmf: Array of k unnormalized densities
+    :return: Array of k normalized densities
+    """
+    return pmf / np.sum(pmf)
 
 
 def p_correct(theta, a, b):
     """
     Probability of answering a question of a certain difficulty and discrimination
-    correctly, given an array of possible theta quadrature points.
+    correctly, given an array of k theta quadrature points.
     :param theta: Array of k quadrature points along ability scale
     :param a: Array of n item discrimination parameters
     :param b: Array of n item difficulty parameters
@@ -54,35 +63,36 @@ def p_correct(theta, a, b):
 
 def likelihood(theta, a, b, x):
     """
-    Likelihood of an observed set of k responses.
-    :param theta: Array of quadrature points along ability scale
-    :param a: Array of k question discrimination parameters
-    :param b: Array of k question difficulty parameters
-    :param x: Array of k question scores (1 or 0)
-    :return: Array of likelihood values for each quadrature point in theta
+    Likelihood of an observed set of n responses, given an array of k quadrature points.
+    :param theta: Array of k quadrature points along ability scale
+    :param a: Array of n question discrimination parameters
+    :param b: Array of n question difficulty parameters
+    :param x: Array of n question scores (1 or 0)
+    :return: Array of k likelihood values for each quadrature point in theta
     """
     p_ = p_correct(theta, a, b)
     p = np.power(p_, x) * np.power(1 - p_, 1 - x)
     return np.prod(p, axis = 1)
 
 
-def eap(theta, L, theta_w):
+def eap(theta, like, prior):
     """
     Expected A Posteriori estimate of individual ability.
-    :param theta: Array of quadrature points along ability scale
-    :param L: Array of likelihood values for each quadrature point
-    :param theta_w: Prior quadrature weights for each quadrature point
+    :param theta: Array of k quadrature points along ability scale
+    :param like: Array of k likelihood values for each quadrature point
+    :param prior: Array of k prior quadrature weights for each quadrature point
     :return: Double representing the mean of the posterior distribution
     """
-    return np.sum(theta * L * theta_w) / np.sum(L * theta_w)
+    return np.sum(theta * like * prior) / np.sum(like * prior)
 
-def eap_psd(theta_hat, theta, L, theta_w):
+
+def eap_psd(theta_hat, theta, like, prior):
     """
     Posterior Standard Deviation of EAP estimate of individual ability.
     :param theta_hat: Double representing EAP estimate of individual ability.
-    :param theta: Array of quadrature points along ability scale
-    :param L: Array of likelihood values for each quadrature point
-    :param theta_w: Prior quadrature weights for each quadrature point
+    :param theta: Array of k quadrature points along ability scale
+    :param like: Array of k likelihood values for each quadrature point
+    :param prior: Array of k prior quadrature weights for each quadrature point
     :return: Double representing the estimated posterior standard deviation
     """
-    return np.sqrt(np.sum(np.power(theta - theta_hat, 2) * L * theta_w) / np.sum(L * theta_w))
+    return np.sqrt(np.sum(np.power(theta - theta_hat, 2) * like * prior) / np.sum(like * prior))
